@@ -56,7 +56,7 @@ func handlerGetAddresses(c *fiber.Ctx) error {
 	}
 
 	// Get Addresses
-	addresses, count, err := crud.GetAddressModel().SelectMany(
+	addresses, err := crud.GetAddressModel().SelectMany(
 		params.Limit,
 		params.Skip,
 	)

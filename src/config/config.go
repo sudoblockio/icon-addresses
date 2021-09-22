@@ -20,6 +20,12 @@ type configType struct {
 	HealthPrefix  string `envconfig:"HEALTH_PREFIX" required:"false" default:"/health"`
 	MetricsPrefix string `envconfig:"METRICS_PREFIX" required:"false" default:"/metrics"`
 
+	// Endpoints
+	MaxPageSize int `envconfig:"MAX_PAGE_SIZE" required:"false" default:"100"`
+
+	// Icon node service
+	IconNodeServiceURL string `envconfig:"ICON_NODE_SERVICE_URL" required:"false" default:"https://ctz.solidwallet.io/api/v3"`
+
 	// CORS
 	CORSAllowOrigins string `envconfig:"CORS_ALLOW_ORIGINS" required:"false" default:"*"`
 
@@ -60,9 +66,6 @@ type configType struct {
 	RedisChannel                  string `envconfig:"REDIS_CHANNEL" required:"false" default:"addresses"`
 	RedisSentinelClientMode       bool   `envconfig:"REDIS_SENTINEL_CLIENT_MODE" required:"false" default:"false"`
 	RedisSentinelClientMasterName string `envconfig:"REDIS_SENTINEL_CLIENT_MASTER_NAME" required:"false" default:"master"`
-
-	// Endpoints
-	MaxPageSize int `envconfig:"MAX_PAGE_SIZE" required:"false" default:"100"`
 }
 
 var Config configType

@@ -75,11 +75,53 @@ func (m *AddressModel) UpdateOne(
 	db = db.Model(&models.Address{})
 
 	// Address
-	db = db.Where("address = ?", address.Address)
+	db = db.Where("public_key = ?", address.PublicKey)
 
 	db = db.Save(address)
 
 	return db.Error
+}
+
+// SelectOne - select one from addresses table
+func (m *AddressModel) SelectOne(
+	publicKey string,
+) (*models.Address, error) {
+	db := m.db
+
+	// Set table
+	db = db.Model(&models.Address{})
+
+	// Public Key
+	db = db.Where("public_key = ?", publicKey)
+
+	address := &models.Address{}
+	db = db.First(address)
+
+	return address, db.Error
+}
+
+// SelectMany - select many from addreses table
+func (m *AddressModel) SelectMany(
+	limit int,
+	skip int,
+) (*[]models.Address, error) {
+	db := m.db
+
+	// Set table
+	db = db.Model(&models.Address{})
+
+	// Limit
+	db = db.Limit(limit)
+
+	// Skip
+	if skip != 0 {
+		db = db.Offset(skip)
+	}
+
+	addresses := &[]models.Address{}
+	db = db.Find(addresses)
+
+	return addresses, db.Error
 }
 
 // StartAddressLoader starts loader
@@ -91,7 +133,7 @@ func StartAddressLoader() {
 			newAddress := <-GetAddressModel().LoaderChannel
 
 			// Update/Insert
-			_, err := GetAddressModel().SelectOne(newAddress.Address)
+			_, err := GetAddressModel().SelectOne(newAddress.PublicKey)
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 
 				// Insert
@@ -99,7 +141,7 @@ func StartAddressLoader() {
 			} else if err == nil {
 				// Update
 				GetAddressModel().UpdateOne(newAddress)
-				zap.S().Debug("Loader=Address, Address=", newAddress.Address, " - Updated")
+				zap.S().Debug("Loader=Address, Address=", newAddress.PublicKey, " - Updated")
 			} else {
 				// Postgress error
 				zap.S().Fatal(err.Error())

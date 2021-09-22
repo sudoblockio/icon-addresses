@@ -2,6 +2,7 @@ package transformers
 
 import (
 	"encoding/hex"
+	"math/big"
 
 	"github.com/golang/protobuf/proto"
 	"go.uber.org/zap"
@@ -11,6 +12,7 @@ import (
 	"github.com/geometry-labs/icon-addresses/kafka"
 	"github.com/geometry-labs/icon-addresses/metrics"
 	"github.com/geometry-labs/icon-addresses/models"
+	"github.com/geometry-labs/icon-addresses/worker/utils"
 )
 
 func StartTransactionsTransformer() {
@@ -48,24 +50,31 @@ func transactionsTransformer() {
 
 		// Loads to: addresses (from address)
 		fromAddress := transformTransactionRawToAddress(transactionRaw, true)
-		addressLoaderChan <- fromAddress
+		if fromAddress != nil {
+			addressLoaderChan <- fromAddress
+		}
 
 		// Loads to: addresses (to address)
 		toAddress := transformTransactionRawToAddress(transactionRaw, false)
-		addressLoaderChan <- toAddress
+		if toAddress != nil {
+			addressLoaderChan <- toAddress
+		}
 
 		// Loads to: addresses_count (from address)
-		fromAddressCount := transformTransactionToAddressCount(transaction, true)
-		addressCountLoaderChan <- fromAddressCount
+		if fromAddress != nil {
+			fromAddressCount := transformAddressToAddressCount(fromAddress)
+			addressCountLoaderChan <- fromAddressCount
+		}
 
 		// Loads to: addresses_count (to address)
-		toAddressCount := transformTransactionToAddressCount(transaction, false)
-		addressCountLoaderChan <- toAddressCount
+		if toAddress != nil {
+			toAddressCount := transformAddressToAddressCount(toAddress)
+			addressCountLoaderChan <- toAddressCount
+		}
 
 		/////////////
 		// Metrics //
 		/////////////
-
 		metrics.MaxBlockNumberTransactionsRawGauge.Set(float64(transactionRaw.BlockNumber))
 	}
 }
@@ -81,33 +90,57 @@ func convertBytesToTransactionRawProtoBuf(value []byte) (*models.TransactionRaw,
 }
 
 // Business logic goes here
-func transformTransactionRawToAddressToAddress(txRaw *models.TransactionRaw, useFromAddress bool) *models.Address {
+func transformTransactionRawToAddress(txRaw *models.TransactionRaw, useFromAddress bool) *models.Address {
 
-	address := ""
+	// Public Key
+	publicKey := ""
 
 	if useFromAddress == true {
-		address = txRaw.FromAddress
+		publicKey = txRaw.FromAddress
 	} else {
-		address = txRaw.ToAddress
+		publicKey = txRaw.ToAddress
+	}
+	if publicKey == "None" {
+		return nil
+	}
+
+	// Current Balance Hex
+	currentBalanceHex, err := utils.IconNodeServiceGetBalanceOf(publicKey)
+	if err != nil {
+		zap.S().Fatal(err.Error())
+	}
+
+	// Current Balance Dec
+	currentBalanceDec := float64(0)
+	if currentBalanceHex != "0x0" {
+		currentBalanceDecBigInt, isSuccess := new(big.Int).SetString(currentBalanceHex[2:], 16)
+		if isSuccess == false {
+			zap.S().Fatal("Cannot parse string to big int, currentBalanceHex=", currentBalanceHex)
+		}
+		currentBalanceDecBigFloat := new(big.Float).SetInt(currentBalanceDecBigInt)
+
+		// 10^18
+		icxBaseBigInt, _ := new(big.Int).SetString("DE0B6B3A7640000", 16)
+		icxBaseBigFloat := new(big.Float).SetInt(icxBaseBigInt)
+
+		currentBalanceDecBigFloat = currentBalanceDecBigFloat.Quo(currentBalanceDecBigFloat, icxBaseBigFloat)
+
+		currentBalanceDec, _ = currentBalanceDecBigFloat.Float64()
+	} else {
+		// current balance is 0
+		currentBalanceDec = 0
 	}
 
 	return &models.Address{
-		Address:        address,
-		CurrentBalance: "0x0",
+		PublicKey:         publicKey,
+		CurrentBalanceHex: currentBalanceHex,
+		CurrentBalanceDec: currentBalanceDec,
 	}
 }
 
-func transformTransactionToAddressCount(tx *models.Transaction, useFromAddress bool) *models.AddressCount {
-
-	address := ""
-
-	if useFromAddress == true {
-		address = txRaw.FromAddress
-	} else {
-		address = txRaw.ToAddress
-	}
+func transformAddressToAddressCount(address *models.Address) *models.AddressCount {
 
 	return &models.AddressCount{
-		Address: address,
+		PublicKey: address.PublicKey,
 	}
 }

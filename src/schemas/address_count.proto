@@ -7,7 +7,7 @@ import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
 message AddressCount {
   option (gorm.opts) = {ormable: true};
 
-  string address = 1 [(gorm.field).tag = {index: "address_count_idx_address"}];
+  string public_key = 1 [(gorm.field).tag = {index: "address_count_idx_public_key"}];
 
   // Postres primary key
   // NOTE: also use as count

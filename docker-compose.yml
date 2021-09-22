@@ -11,6 +11,12 @@ x-env: &env
   HEALTH_PREFIX: "/heath"
   METRICS_PREFIX: "/metrics"
 
+  # Endpoints
+  MAX_PAGE_SIZE: 100
+
+  # Icon node service
+  ICON_NODE_SERVICE_URL: "https://ctz.solidwallet.io/api/v3"
+
   # CORS
   CORS_ALLOW_ORIGINS: "*"
 
@@ -51,8 +57,6 @@ x-env: &env
   REDIS_SENTINEL_CLIENT_MODE: "false"
   REDIS_SENTINEL_CLIENT_MASTER_NAME: "master"
 
-  # Endpoints
-  MAX_PAGE_SIZE: 100
 
 services:
   addresses-api:

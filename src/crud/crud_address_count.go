@@ -7,91 +7,86 @@ import (
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 
-	"github.com/geometry-labs/icon-logs/models"
+	"github.com/geometry-labs/icon-addresses/models"
 )
 
-// LogCountModel - type for log table model
-type LogCountModel struct {
+// AddressCountModel - type for address table model
+type AddressCountModel struct {
 	db            *gorm.DB
-	model         *models.LogCount
-	modelORM      *models.LogCountORM
-	LoaderChannel chan *models.LogCount
+	model         *models.AddressCount
+	modelORM      *models.AddressCountORM
+	LoaderChannel chan *models.AddressCount
 }
 
-var logCountModel *LogCountModel
-var logCountModelOnce sync.Once
+var addressCountModel *AddressCountModel
+var addressCountModelOnce sync.Once
 
-// GetLogModel - create and/or return the logs table model
-func GetLogCountModel() *LogCountModel {
-	logCountModelOnce.Do(func() {
+// GetAddressModel - create and/or return the addresss table model
+func GetAddressCountModel() *AddressCountModel {
+	addressCountModelOnce.Do(func() {
 		dbConn := getPostgresConn()
 		if dbConn == nil {
 			zap.S().Fatal("Cannot connect to postgres database")
 		}
 
-		logCountModel = &LogCountModel{
+		addressCountModel = &AddressCountModel{
 			db:            dbConn,
-			model:         &models.LogCount{},
-			LoaderChannel: make(chan *models.LogCount, 1),
+			model:         &models.AddressCount{},
+			LoaderChannel: make(chan *models.AddressCount, 1),
 		}
 
-		err := logCountModel.Migrate()
+		err := addressCountModel.Migrate()
 		if err != nil {
-			zap.S().Fatal("LogCountModel: Unable migrate postgres table: ", err.Error())
+			zap.S().Fatal("AddressCountModel: Unable migrate postgres table: ", err.Error())
 		}
 
-		StartLogCountLoader()
+		StartAddressCountLoader()
 	})
 
-	return logCountModel
+	return addressCountModel
 }
 
-// Migrate - migrate logCounts table
-func (m *LogCountModel) Migrate() error {
-	// Only using LogCountRawORM (ORM version of the proto generated struct) to create the TABLE
+// Migrate - migrate addressCounts table
+func (m *AddressCountModel) Migrate() error {
+	// Only using AddressCountRawORM (ORM version of the proto generated struct) to create the TABLE
 	err := m.db.AutoMigrate(m.modelORM) // Migration and Index creation
 	return err
 }
 
-// Insert - Insert logCount into table
-func (m *LogCountModel) Insert(logCount *models.LogCount) error {
+// Insert - Insert addressCount into table
+func (m *AddressCountModel) Insert(addressCount *models.AddressCount) error {
 	db := m.db
 
 	// Set table
-	db = db.Model(&models.LogCount{})
+	db = db.Model(&models.AddressCount{})
 
-	db = db.Create(logCount)
+	db = db.Create(addressCount)
 
 	return db.Error
 }
 
-// Select - select from logCounts table
-func (m *LogCountModel) SelectOne(transactionHash string, logIndex uint64) (models.LogCount, error) {
+// Select - select from addressCounts table
+func (m *AddressCountModel) SelectOne(publicKey string) (models.AddressCount, error) {
 	db := m.db
 
 	// Set table
-	db = db.Model(&models.LogCount{})
+	db = db.Model(&models.AddressCount{})
 
-	logCount := models.LogCount{}
+	addressCount := models.AddressCount{}
 
 	// Transaction Hash
-	db = db.Where("transaction_hash = ?", transactionHash)
+	db = db.Where("public_key = ?", publicKey)
 
-	// Log Index
-	db = db.Where("log_index = ?", logIndex)
+	db = db.First(&addressCount)
 
-	db = db.First(&logCount)
-
-	return logCount, db.Error
+	return addressCount, db.Error
 }
 
-func (m *LogCountModel) SelectLargestCount() (uint64, error) {
-
+func (m *AddressCountModel) SelectLargestCount() (uint64, error) {
 	db := m.db
-	//computeCount := false
 
 	// Set table
-	db = db.Model(&models.LogCount{})
+	db = db.Model(&models.AddressCount{})
 
 	// Get max id
 	count := uint64(0)
@@ -101,47 +96,26 @@ func (m *LogCountModel) SelectLargestCount() (uint64, error) {
 	return count, db.Error
 }
 
-func (m *LogCountModel) Update(logCount *models.LogCount) error {
-
-	db := m.db
-	//computeCount := false
-
-	// Set table
-	db = db.Model(&models.LogCount{})
-
-	// Transaction Hash
-	db = db.Where("transaction_hash = ?", logCount.TransactionHash)
-
-	// Log Index
-	db = db.Where("log_index = ?", logCount.LogIndex)
-
-	// Update
-	db = db.Save(logCount)
-
-	return db.Error
-}
-
-// StartLogCountLoader starts loader
-func StartLogCountLoader() {
+// StartAddressCountLoader starts loader
+func StartAddressCountLoader() {
 	go func() {
 
 		for {
-			// Read logCount
-			newLogCount := <-GetLogCountModel().LoaderChannel
+			// Read addressCount
+			newAddressCount := <-GetAddressCountModel().LoaderChannel
 
 			// Insert
-			_, err := GetLogCountModel().SelectOne(
-				newLogCount.TransactionHash,
-				newLogCount.LogIndex,
+			_, err := GetAddressCountModel().SelectOne(
+				newAddressCount.PublicKey,
 			)
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				// Insert
-				err = GetLogCountModel().Insert(newLogCount)
+				err = GetAddressCountModel().Insert(newAddressCount)
 				if err != nil {
 					zap.S().Fatal(err.Error())
 				}
 
-				zap.S().Debug("Loader=LogCount, TransactionHash=", newLogCount.TransactionHash, " LogIndex=", newLogCount.LogIndex, " - Insert")
+				zap.S().Debug("Loader=AddressCount, Address=", newAddressCount.PublicKey, " - Insert")
 			} else if err != nil {
 				// Error
 				zap.S().Fatal(err.Error())
