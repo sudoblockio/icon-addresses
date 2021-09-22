@@ -1,0 +1,17 @@
+syntax = "proto3";
+package models;
+option go_package = "./models";
+
+import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
+
+message LogCountByAddress {
+  option (gorm.opts) = {ormable: true};
+
+  uint64 log_index = 1 [(gorm.field).tag = {index: "log_count_by_address_idx_log_index"}];
+  string transaction_hash = 2 [(gorm.field).tag = {index: "log_count_by_address_idx_transaction_hash"}];
+  string address = 3 [(gorm.field).tag = {index: "log_count_by_address_idx_address"}];
+
+  // Postgres primary key
+  // Use as count
+  uint64 id = 5;
+}

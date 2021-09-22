@@ -1,0 +1,39 @@
+[
+  {
+    "type":"log",
+    "transaction_hash":"0xc34fc0c061a6ad5f6eef087f3dae7b633a40bac1b7697ee528eb3f5861daecbe",
+    "transaction_index":1,
+    "address":"cx38fd2687b202caf4bd1bda55223578f39dbb6561",
+    "data":"[]",
+    "indexed":"[\"BetSource(Address,int)\",\"hx206f3bc046e7911749a86f1d868f0037c5c347d4\",\"0x5c19f8b9818f8\"]",
+    "block_number":34010700,
+    "block_timestamp":1620265871298371,
+    "block_hash":"1c5a1000086e49004cc3650a8e4ea09edfc2a82887d7fd8f328bc6fb6a1186bc",
+    "item_id":"log_0xc34fc0c061a6ad5f6eef087f3dae7b633a40bac1b7697ee528eb3f5861daecbe_0",
+    "id":2381
+  },
+  {
+    "type":"log",
+    "transaction_hash":"0x3b69741ff2c85085677bb62858f383dc04c0e23884dc1fecdfc837807666e529",
+    "transaction_index":1,
+    "address":"cxf61cd5a45dc9f91c15aa65831a30a90d59a09619",
+    "data":"[\"0x4e6f6e65\"]","indexed":"[\"Transfer(Address,Address,int,bytes)\", \"hx39cc3166b9021871bc7f7e77f488aa488810e81e\", \"hx2d7a45a394d04ecc4786cfc80725d109a17fb156\", \"0x59a6d90ac66d574\"]",
+    "block_number":34017600,
+    "block_timestamp":1620279794600405,
+    "block_hash":"4d02f077a7949ad9227ec4a9ec9cf4f8302c63faf01306059166438695d8ab4b",
+    "item_id":"log_0x3b69741ff2c85085677bb62858f383dc04c0e23884dc1fecdfc837807666e529_0",
+    "id":33192
+  },
+  {
+    "type":"log",
+    "transaction_hash":"0x6b1374d8158d8e56245013340e8b4b9944b7530cb896b1443ca250ecb8d93228",
+    "transaction_index":1,
+    "address":"cx0000000000000000000000000000000000000000",
+    "data":"[\"0x51bfe2b53ba05219b18\", \"0x14ed89e8c37d0295f\"]","indexed":"[\"IScoreClaimedV2(Address,int,int)\", \"hx66dac1a587879ed945a3fac76dc0fa55c462ae11\"]",
+    "block_number":34020299,
+    "block_timestamp":1620285246923883,
+    "block_hash":"fe5cdf966f2ba84363b0d6cec29d6a3dc0edcef5d81485c85e243f6b0ae4ccd2",
+    "item_id":"log_0x6b1374d8158d8e56245013340e8b4b9944b7530cb896b1443ca250ecb8d93228_0",
+    "id":46823
+  }
+]

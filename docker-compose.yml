@@ -1,0 +1,103 @@
+version: "3.7"
+
+x-env: &env
+  NAME: "logs"
+  NETWORK_NAME: "mainnet"
+
+
+  # Prefix
+  REST_PREFIX: "/api/v1"
+  WEBSOCKET_PREFIX: "/ws/v1"
+  HEALTH_PREFIX: "/heath"
+  METRICS_PREFIX: "/metrics"
+
+  # CORS
+  CORS_ALLOW_ORIGINS: "*"
+
+  # Monitoring
+  HEALTH_POLLING_INTERVAL: "60"
+
+  # Logging
+  LOG_LEVEL: "DEBUG"
+  LOG_TO_FILE: "false"
+  LOG_FILE_NAME: "logs.log"
+  LOG_FORMAT: "string"
+
+  # Kafka
+  KAFKA_BROKER_URL: "kafka:9092"
+  SCHEMA_REGISTRY_URL: "schemaregistry:8081"
+  KAFKA_GROUP_ID: "logs-service"
+
+  # Topics
+  CONSUMER_TOPICS: "logs"
+  SCHEMA_NAME_TOPICS: "logs-ws:logs"
+  SCHEMA_FOLDER_PATH: "/app/schemas/"
+
+  # DB
+  DB_DRIVER: "postgres"
+  DB_HOST: "postgres"
+  DB_PORT: "5432"
+  DB_USER: "postgres"
+  DB_PASSWORD: "changeme"
+  DB_DBNAME: "postgres"
+  DB_SSLMODE: "disable"
+  DB_TIMEZONE: "UTC"
+
+  # Redis
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  REDIS_PASSWORD: ""
+  REDIS_CHANNEL: "logs"
+  REDIS_SENTINEL_CLIENT_MODE: "false"
+  REDIS_SENTINEL_CLIENT_MASTER_NAME: "master"
+
+  # Endpoints
+  MAX_PAGE_SIZE: 100
+
+services:
+  logs-api:
+    build:
+      context: ${LOGS_CONTEXT:-.}
+      target: ${LOGS_TARGET:-prod}
+      args:
+        - SERVICE_NAME=api
+    ports:
+      - "8000:8000"     # API
+      - "8180:8180"     # Health
+      - "9400:9400"     # Prometheus
+      - "40000:40000"   # Remote Debug
+    security_opt:
+      - "seccomp:unconfined"
+    cap_add:
+      - SYS_PTRACE
+    volumes:
+      - ${LOGS_CONTEXT:-.}/src:/app
+    environment:
+      <<: *env
+      # Ports
+      PORT: "8000"
+      HEALTH_PORT: "8180"
+      METRICS_PORT: "9400"
+
+  logs-worker:
+    build:
+      context: ${LOGS_CONTEXT:-.}
+      target: ${LOGS_TARGET:-prod}
+      args:
+        - SERVICE_NAME=worker
+    ports:
+      - "8181:8181"     # Health
+      - "9401:9401"     # Prometheus
+      - "40001:40001"   # Remote Debug
+    security_opt:
+      - "seccomp:unconfined"
+    cap_add:
+      - SYS_PTRACE
+    volumes:
+      - ${LOGS_CONTEXT:-.}/src:/app
+    environment:
+      <<: *env
+      # Ports
+      PORT: "8001"
+      HEALTH_PORT: "8181"
+      METRICS_PORT: "9401"

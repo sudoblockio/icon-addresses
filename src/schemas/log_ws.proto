@@ -1,0 +1,31 @@
+syntax = "proto3";
+package models;
+option go_package = "./models";
+
+import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
+
+message LogWebsocket {
+
+  string type = 1;
+  uint64 log_index = 2;
+  string transaction_hash = 3;
+  uint32 transaction_index = 4;
+  string address = 5;
+  string data = 6;
+  string indexed = 7;
+  uint64 block_number = 8;
+  uint64 block_timestamp = 9;
+  string block_hash = 10;
+  string method = 11;
+}
+
+
+// GORM table to store all seen websocket messages
+// Used to avoid duplicate messages
+message LogWebsocketIndex {
+  // GROM to keep track of every message sent
+  option (gorm.opts) = {ormable: true};
+
+  uint64 log_index = 1 [(gorm.field).tag = {primary_key: true}];
+  string transaction_hash = 2 [(gorm.field).tag = {primary_key: true}];
+}
