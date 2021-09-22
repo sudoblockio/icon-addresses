@@ -10,7 +10,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/geometry-labs/icon-logs/config"
+	"github.com/geometry-labs/icon-addresses/config"
 )
 
 func TestMetricsAPIStart(t *testing.T) {

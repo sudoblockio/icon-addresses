@@ -9,7 +9,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	"github.com/geometry-labs/icon-logs/config"
+	"github.com/geometry-labs/icon-addresses/config"
 )
 
 func formatPostgresDSN(host string, port string, user string, password string, dbname string, sslmode string, timezone string) string {

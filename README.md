@@ -1,10 +1,10 @@
 <p align="center">
-  <h2 align="center">ICON Logs Service</h2>
+  <h2 align="center">ICON Addresses Service</h2>
 </p>
 
-[![loopchain](https://img.shields.io/badge/ICON-API-blue?logoColor=white&logo=icon&labelColor=31B8BB)](https://shields.io) [![GitHub Release](https://img.shields.io/github/release/geometry-labs/icon-logs.svg?style=flat)]() ![](https://github.com/geometry-labs/icon-logs/workflows/push-main/badge.svg?branch=main) [![codecov](https://codecov.io/gh/geometry-labs/icon-logs/branch/main/graph/badge.svg)](https://codecov.io/gh/geometry-labs/icon-logs) ![](https://img.shields.io/docker/pulls/geometrylabs/icon-logs-api.svg) ![](https://img.shields.io/github/license/geometry-labs/icon-logs)
+[![loopchain](https://img.shields.io/badge/ICON-API-blue?logoColor=white&logo=icon&labelColor=31B8BB)](https://shields.io) [![GitHub Release](https://img.shields.io/github/release/geometry-labs/icon-addresses.svg?style=flat)]() ![](https://github.com/geometry-labs/icon-addresses/workflows/push-main/badge.svg?branch=main) [![codecov](https://codecov.io/gh/geometry-labs/icon-addresses/branch/main/graph/badge.svg)](https://codecov.io/gh/geometry-labs/icon-addresses) ![](https://img.shields.io/docker/pulls/geometrylabs/icon-addresses-api.svg) ![](https://img.shields.io/github/license/geometry-labs/icon-addresses)
 
-Off chain indexer for the ICON Blockchain serving the **logs** context of the [icon-explorer](https://github.com/geometry-labs/icon-explorer). Service is broken up into API and worker components that are run as individual docker containers. It depends on data coming in from [icon-etl](https://github.com/geometry-labs/icon-etl) over a Kafka message queue with persistence on a MongoDB database. 
+Off chain indexer for the ICON Blockchain serving the **addresses** context of the [icon-explorer](https://github.com/geometry-labs/icon-explorer). Service is broken up into API and worker components that are run as individual docker containers. It depends on data coming in from [icon-etl](https://github.com/geometry-labs/icon-etl) over a Kafka message queue with persistence on a MongoDB database. 
 
 ### Endpoints 
 

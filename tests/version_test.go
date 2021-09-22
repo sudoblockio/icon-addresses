@@ -13,12 +13,12 @@ import (
 func TestVersionEndpoint(t *testing.T) {
 	assert := assert.New(t)
 
-	logsServiceURL := os.Getenv("LOGS_SERVICE_URL")
-	if logsServiceURL == "" {
-		logsServiceURL = "http://localhost:8000"
+	addressesServiceURL := os.Getenv("ADDRESSES_SERVICE_URL")
+	if addressesServiceURL == "" {
+		addressesServiceURL = "http://localhost:8000"
 	}
 
-	resp, err := http.Get(logsServiceURL + "/version")
+	resp, err := http.Get(addressesServiceURL + "/version")
 	assert.Equal(nil, err)
 	assert.Equal(200, resp.StatusCode)
 

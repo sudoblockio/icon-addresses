@@ -3,17 +3,15 @@ package routes
 import (
 	"encoding/json"
 
-	"github.com/geometry-labs/icon-logs/config"
-	"github.com/geometry-labs/icon-logs/global"
-	"go.uber.org/zap"
-
 	swagger "github.com/arsmn/fiber-swagger/v2"
 	fiber "github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"go.uber.org/zap"
 
-	_ "github.com/geometry-labs/icon-logs/api/docs" // import swagger docs
-	"github.com/geometry-labs/icon-logs/api/routes/rest"
-	"github.com/geometry-labs/icon-logs/api/routes/ws"
+	_ "github.com/geometry-labs/icon-addresses/api/docs" // import swagger docs
+	"github.com/geometry-labs/icon-addresses/api/routes/rest"
+	"github.com/geometry-labs/icon-addresses/config"
+	"github.com/geometry-labs/icon-addresses/global"
 )
 
 // @title Go api template docs
@@ -37,15 +35,14 @@ func Start() {
 	}))
 
 	// Swagger docs
-	app.Get(config.Config.RestPrefix+"/logs/docs/*", swagger.Handler)
+	app.Get(config.Config.RestPrefix+"/addresses/docs/*", swagger.Handler)
 
 	// Add version handlers
 	app.Get("/version", handlerVersion)
 	app.Get("/metadata", handlerMetadata)
 
 	// Add handlers
-	rest.LogsAddHandlers(app)
-	ws.LogsAddHandlers(app)
+	rest.AddressesAddHandlers(app)
 
 	go app.Listen(":" + config.Config.Port)
 }

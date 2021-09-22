@@ -7,7 +7,7 @@ import (
 	"go.uber.org/zap"
 	"gopkg.in/Shopify/sarama.v1"
 
-	"github.com/geometry-labs/icon-logs/config"
+	"github.com/geometry-labs/icon-addresses/config"
 )
 
 type kafkaTopicConsumer struct {

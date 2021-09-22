@@ -8,7 +8,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/geometry-labs/icon-logs/config"
+	"github.com/geometry-labs/icon-addresses/config"
 )
 
 func TestInit(t *testing.T) {

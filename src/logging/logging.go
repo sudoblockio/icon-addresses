@@ -7,8 +7,8 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	"github.com/geometry-labs/icon-logs/config"
-	"github.com/geometry-labs/icon-logs/global"
+	"github.com/geometry-labs/icon-addresses/config"
+	"github.com/geometry-labs/icon-addresses/global"
 )
 
 // Init - init logging config
@@ -22,7 +22,7 @@ func Init() {
 		undo := zap.ReplaceGlobals(logger)
 		defer undo()
 
-    global.WaitShutdownSig()
+		global.WaitShutdownSig()
 	}()
 }
 

@@ -30,10 +30,10 @@ build:  ## Build everything
 	docker-compose build
 
 build-api:  ## Build the api
-	docker-compose build logs-api
+	docker-compose build addresses-api
 
 build-worker:  ## Build the worker
-	docker-compose build logs-worker
+	docker-compose build addresses-worker
 
 ps:  ## List all containers and running status
 	docker-compose -f docker-compose.db.yml -f docker-compose.yml ps

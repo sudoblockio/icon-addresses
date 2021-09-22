@@ -3,12 +3,12 @@ package main
 import (
 	"log"
 
-	"github.com/geometry-labs/icon-logs/config"
-	"github.com/geometry-labs/icon-logs/global"
-	"github.com/geometry-labs/icon-logs/kafka"
-	"github.com/geometry-labs/icon-logs/logging"
-	"github.com/geometry-labs/icon-logs/metrics"
-	"github.com/geometry-labs/icon-logs/worker/transformers"
+	"github.com/geometry-labs/icon-addresses/config"
+	"github.com/geometry-labs/icon-addresses/global"
+	"github.com/geometry-labs/icon-addresses/kafka"
+	"github.com/geometry-labs/icon-addresses/logging"
+	"github.com/geometry-labs/icon-addresses/metrics"
+	"github.com/geometry-labs/icon-addresses/worker/transformers"
 )
 
 func main() {
@@ -24,7 +24,7 @@ func main() {
 	kafka.StartWorkerConsumers()
 
 	// Start transformers
-	transformers.StartLogsTransformer()
+	transformers.StartTransactionsTransformer()
 
 	global.WaitShutdownSig()
 }

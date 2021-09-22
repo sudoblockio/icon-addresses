@@ -1,7 +1,7 @@
 version: "3.7"
 
 x-env: &env
-  NAME: "logs"
+  NAME: "addresses"
   NETWORK_NAME: "mainnet"
 
 
@@ -20,17 +20,17 @@ x-env: &env
   # Logging
   LOG_LEVEL: "DEBUG"
   LOG_TO_FILE: "false"
-  LOG_FILE_NAME: "logs.log"
+  LOG_FILE_NAME: "addresses.log"
   LOG_FORMAT: "string"
 
   # Kafka
   KAFKA_BROKER_URL: "kafka:9092"
   SCHEMA_REGISTRY_URL: "schemaregistry:8081"
-  KAFKA_GROUP_ID: "logs-service"
+  KAFKA_GROUP_ID: "addresses-service"
 
   # Topics
-  CONSUMER_TOPICS: "logs"
-  SCHEMA_NAME_TOPICS: "logs-ws:logs"
+  CONSUMER_TOPICS: "addresses"
+  SCHEMA_NAME_TOPICS: "addresses-ws:addresses"
   SCHEMA_FOLDER_PATH: "/app/schemas/"
 
   # DB
@@ -47,7 +47,7 @@ x-env: &env
   REDIS_HOST: "redis"
   REDIS_PORT: "6379"
   REDIS_PASSWORD: ""
-  REDIS_CHANNEL: "logs"
+  REDIS_CHANNEL: "addresses"
   REDIS_SENTINEL_CLIENT_MODE: "false"
   REDIS_SENTINEL_CLIENT_MASTER_NAME: "master"
 
@@ -55,10 +55,10 @@ x-env: &env
   MAX_PAGE_SIZE: 100
 
 services:
-  logs-api:
+  addresses-api:
     build:
-      context: ${LOGS_CONTEXT:-.}
-      target: ${LOGS_TARGET:-prod}
+      context: ${ADDRESSES_CONTEXT:-.}
+      target: ${ADDRESSES_TARGET:-prod}
       args:
         - SERVICE_NAME=api
     ports:
@@ -71,7 +71,7 @@ services:
     cap_add:
       - SYS_PTRACE
     volumes:
-      - ${LOGS_CONTEXT:-.}/src:/app
+      - ${ADDRESSES_CONTEXT:-.}/src:/app
     environment:
       <<: *env
       # Ports
@@ -79,10 +79,10 @@ services:
       HEALTH_PORT: "8180"
       METRICS_PORT: "9400"
 
-  logs-worker:
+  addresses-worker:
     build:
-      context: ${LOGS_CONTEXT:-.}
-      target: ${LOGS_TARGET:-prod}
+      context: ${ADDRESSES_CONTEXT:-.}
+      target: ${ADDRESSES_TARGET:-prod}
       args:
         - SERVICE_NAME=worker
     ports:
@@ -94,7 +94,7 @@ services:
     cap_add:
       - SYS_PTRACE
     volumes:
-      - ${LOGS_CONTEXT:-.}/src:/app
+      - ${ADDRESSES_CONTEXT:-.}/src:/app
     environment:
       <<: *env
       # Ports

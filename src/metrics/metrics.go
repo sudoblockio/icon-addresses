@@ -8,7 +8,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 
-	"github.com/geometry-labs/icon-logs/config"
+	"github.com/geometry-labs/icon-addresses/config"
 )
 
 // Metrics

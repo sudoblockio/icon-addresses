@@ -5,8 +5,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/geometry-labs/icon-logs/config"
-	"github.com/geometry-labs/icon-logs/logging"
+	"github.com/geometry-labs/icon-addresses/config"
+	"github.com/geometry-labs/icon-addresses/logging"
 )
 
 func init() {
@@ -18,10 +18,10 @@ func init() {
 	logging.Init()
 }
 
-func TestLoadLogFixtures(t *testing.T) {
+func TestLoadAddressFixtures(t *testing.T) {
 	assert := assert.New(t)
 
-	logFixtures := LoadLogFixtures()
+	addressFixtures := LoadAddressFixtures()
 
-	assert.NotEqual(0, len(logFixtures))
+	assert.NotEqual(0, len(addressFixtures))
 }

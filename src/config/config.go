@@ -7,7 +7,7 @@ import (
 )
 
 type configType struct {
-	Name        string `envconfig:"NAME" required:"false" default:"logs-service"`
+	Name        string `envconfig:"NAME" required:"false" default:"addresses-service"`
 	NetworkName string `envconfig:"NETWORK_NAME" required:"false" default:"mainnnet"`
 
 	// Ports
@@ -16,10 +16,9 @@ type configType struct {
 	MetricsPort string `envconfig:"METRICS_PORT" required:"false" default:"9400"`
 
 	// Prefix
-	RestPrefix      string `envconfig:"REST_PREFIX" required:"false" default:"/api/v1"`
-	WebsocketPrefix string `envconfig:"WEBSOCKET_PREFIX" required:"false" default:"/ws/v1"`
-	HealthPrefix    string `envconfig:"HEALTH_PREFIX" required:"false" default:"/health"`
-	MetricsPrefix   string `envconfig:"METRICS_PREFIX" required:"false" default:"/metrics"`
+	RestPrefix    string `envconfig:"REST_PREFIX" required:"false" default:"/api/v1"`
+	HealthPrefix  string `envconfig:"HEALTH_PREFIX" required:"false" default:"/health"`
+	MetricsPrefix string `envconfig:"METRICS_PREFIX" required:"false" default:"/metrics"`
 
 	// CORS
 	CORSAllowOrigins string `envconfig:"CORS_ALLOW_ORIGINS" required:"false" default:"*"`
@@ -30,22 +29,19 @@ type configType struct {
 	// Logging
 	LogLevel    string `envconfig:"LOG_LEVEL" required:"false" default:"INFO"`
 	LogToFile   bool   `envconfig:"LOG_TO_FILE" required:"false" default:"false"`
-	LogFileName string `envconfig:"LOG_FILE_NAME" required:"false" default:"logs-service.log"`
+	LogFileName string `envconfig:"LOG_FILE_NAME" required:"false" default:"addresses-service.log"`
 	LogFormat   string `envconfig:"LOG_FORMAT" required:"false" default:"json"`
 
 	// Kafka
 	KafkaBrokerURL    string `envconfig:"KAFKA_BROKER_URL" required:"false" default:"localhost:29092"`
 	SchemaRegistryURL string `envconfig:"SCHEMA_REGISTRY_URL" required:"false" default:"localhost:8081"`
-	KafkaGroupID      string `envconfig:"KAFKA_GROUP_ID" required:"false" default:"logs-service"`
+	KafkaGroupID      string `envconfig:"KAFKA_GROUP_ID" required:"false" default:"addresses-service"`
 
 	// Topics
-	ConsumerGroup             string            `envconfig:"CONSUMER_GROUP" required:"false" default:"logs-consumer-group"`
-	ConsumerTopicBlocks       string            `envconfig:"CONSUMER_TOPIC_BLOCKS" required:"false" default:"blocks"`
-	ConsumerTopicTransactions string            `envconfig:"CONSUMER_TOPIC_TRANSACTIONS" required:"false" default:"transactions"`
-	ConsumerTopicLogs         string            `envconfig:"CONSUMER_TOPIC_LOGS" required:"false" default:"logs"`
-	ProducerTopics            []string          `envconfig:"PRODUCER_TOPICS" required:"false" default:"logs-ws"`
-	SchemaNameTopics          map[string]string `envconfig:"SCHEMA_NAME_TOPICS" required:"false" default:"logs-ws:logs"`
-	SchemaFolderPath          string            `envconfig:"SCHEMA_FOLDER_PATH" required:"false" default:"schemas/"`
+	ConsumerGroup             string `envconfig:"CONSUMER_GROUP" required:"false" default:"addresses-consumer-group"`
+	ConsumerTopicBlocks       string `envconfig:"CONSUMER_TOPIC_BLOCKS" required:"false" default:"blocks"`
+	ConsumerTopicTransactions string `envconfig:"CONSUMER_TOPIC_TRANSACTIONS" required:"false" default:"transactions"`
+	ConsumerTopicLogs         string `envconfig:"CONSUMER_TOPIC_LOGS" required:"false" default:"logs"`
 
 	// DB
 	DbDriver   string `envconfig:"DB_DRIVER" required:"false" default:"postgres"`
@@ -61,7 +57,7 @@ type configType struct {
 	RedisHost                     string `envconfig:"REDIS_HOST" required:"false" default:"localhost"`
 	RedisPort                     string `envconfig:"REDIS_PORT" required:"false" default:"6379"`
 	RedisPassword                 string `envconfig:"REDIS_PASSWORD" required:"false" default:""`
-	RedisChannel                  string `envconfig:"REDIS_CHANNEL" required:"false" default:"logs"`
+	RedisChannel                  string `envconfig:"REDIS_CHANNEL" required:"false" default:"addresses"`
 	RedisSentinelClientMode       bool   `envconfig:"REDIS_SENTINEL_CLIENT_MODE" required:"false" default:"false"`
 	RedisSentinelClientMasterName string `envconfig:"REDIS_SENTINEL_CLIENT_MASTER_NAME" required:"false" default:"master"`
 

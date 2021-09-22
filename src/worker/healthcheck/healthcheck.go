@@ -1,16 +1,17 @@
 package healthcheck
 
 import (
-	"go.uber.org/zap"
 	"net/http"
 	"net/url"
 	"time"
+
+	"go.uber.org/zap"
 
 	"github.com/InVisionApp/go-health/v2"
 	"github.com/InVisionApp/go-health/v2/checkers"
 	"github.com/InVisionApp/go-health/v2/handlers"
 
-	"github.com/geometry-labs/icon-logs/config"
+	"github.com/geometry-labs/icon-addresses/config"
 )
 
 func Start() {

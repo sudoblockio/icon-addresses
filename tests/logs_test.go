@@ -10,19 +10,19 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestLogsEndpoint(t *testing.T) {
+func TestAddressesEndpoint(t *testing.T) {
 	assert := assert.New(t)
 
-	logsServiceURL := os.Getenv("LOGS_SERVICE_URL")
-	if logsServiceURL == "" {
-		logsServiceURL = "http://localhost:8000"
+	addressesServiceURL := os.Getenv("ADDRESSES_SERVICE_URL")
+	if addressesServiceURL == "" {
+		addressesServiceURL = "http://localhost:8000"
 	}
-	logsServiceRestPrefx := os.Getenv("LOGS_SERVICE_REST_PREFIX")
-	if logsServiceRestPrefx == "" {
-		logsServiceRestPrefx = "/api/v1"
+	addressesServiceRestPrefx := os.Getenv("ADDRESSES_SERVICE_REST_PREFIX")
+	if addressesServiceRestPrefx == "" {
+		addressesServiceRestPrefx = "/api/v1"
 	}
 
-	resp, err := http.Get(logsServiceURL + logsServiceRestPrefx + "/logs")
+	resp, err := http.Get(addressesServiceURL + addressesServiceRestPrefx + "/addresses")
 	assert.Equal(nil, err)
 	assert.Equal(200, resp.StatusCode)
 

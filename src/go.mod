@@ -1,4 +1,4 @@
-module github.com/geometry-labs/icon-logs
+module github.com/geometry-labs/icon-addresses
 
 go 1.16
 

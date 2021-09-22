@@ -3,14 +3,14 @@ package main
 import (
 	"log"
 
-	"github.com/geometry-labs/icon-logs/api/healthcheck"
-	"github.com/geometry-labs/icon-logs/api/routes"
-	"github.com/geometry-labs/icon-logs/config"
-	"github.com/geometry-labs/icon-logs/global"
-	"github.com/geometry-labs/icon-logs/logging"
-	"github.com/geometry-labs/icon-logs/metrics"
-	_ "github.com/geometry-labs/icon-logs/models" // for swagger docs
-	"github.com/geometry-labs/icon-logs/redis"
+	"github.com/geometry-labs/icon-addresses/api/healthcheck"
+	"github.com/geometry-labs/icon-addresses/api/routes"
+	"github.com/geometry-labs/icon-addresses/config"
+	"github.com/geometry-labs/icon-addresses/global"
+	"github.com/geometry-labs/icon-addresses/logging"
+	"github.com/geometry-labs/icon-addresses/metrics"
+	_ "github.com/geometry-labs/icon-addresses/models" // for swagger docs
+	"github.com/geometry-labs/icon-addresses/redis"
 )
 
 func main() {
