@@ -104,11 +104,14 @@ func (m *AddressModel) SelectOne(
 func (m *AddressModel) SelectMany(
 	limit int,
 	skip int,
+	isContract bool,
 ) (*[]models.Address, error) {
 	db := m.db
 
 	// Set table
 	db = db.Model(&models.Address{})
+
+	db = db.Where("is_contract = ?", isContract)
 
 	// Limit
 	db = db.Limit(limit)
