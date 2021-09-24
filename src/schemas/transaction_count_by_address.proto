@@ -4,9 +4,10 @@ option go_package = "./models";
 
 import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
 
-message LogCountByAddress {
+message TransactionCountByAddress {
   option (gorm.opts) = {ormable: true};
 
-  string transaction_hash = 1 [(gorm.field).tag = {index: "log_count_by_address_idx_transaction_hash"}];
-  string address = 2 [(gorm.field).tag = {index: "log_count_by_address_idx_address"}];
+  string transaction_hash = 1 [(gorm.field).tag = {primary_key: true}];
+  string public_key = 2 [(gorm.field).tag = {index: "transaction_count_by_address_idx_public_key"}];
+  uint64 count = 3 [(gorm.field).tag = {index: "transaction_count_by_address_idx_count"}];
 }

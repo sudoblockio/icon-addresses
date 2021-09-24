@@ -26,6 +26,7 @@ func transactionsTransformer() {
 	// Output channels
 	addressLoaderChan := crud.GetAddressModel().LoaderChannel
 	addressCountLoaderChan := crud.GetAddressCountModel().LoaderChannel
+	transactionCountByAddressLoaderChan := crud.GetTransactionCountByAddressModel().LoaderChannel
 
 	zap.S().Debug("Transactions Transformer: started working")
 
@@ -68,6 +69,18 @@ func transactionsTransformer() {
 		if toAddress != nil {
 			toAddressCount := transformAddressToAddressCount(toAddress)
 			addressCountLoaderChan <- toAddressCount
+		}
+
+		// Loads to transaction_count_by_addresses (from address)
+		transactionCountByAddressFromAddress := transformTransactionRawToTransactionCountByAddress(transactionRaw, true)
+		if transactionCountByAddressFromAddress != nil {
+			transactionCountByAddressLoaderChan <- transactionCountByAddressFromAddress
+		}
+
+		// Loads to transaction_count_by_addresses (to address)
+		transactionCountByAddressToAddress := transformTransactionRawToTransactionCountByAddress(transactionRaw, false)
+		if transactionCountByAddressToAddress != nil {
+			transactionCountByAddressLoaderChan <- transactionCountByAddressToAddress
 		}
 
 		/////////////
@@ -118,5 +131,27 @@ func transformAddressToAddressCount(address *models.Address) *models.AddressCoun
 
 	return &models.AddressCount{
 		PublicKey: address.PublicKey,
+	}
+}
+
+// Business logic goes here
+func transformTransactionRawToTransactionCountByAddress(txRaw *models.TransactionRaw, useFromAddress bool) *models.TransactionCountByAddress {
+
+	// Public Key
+	publicKey := ""
+
+	if useFromAddress == true {
+		publicKey = txRaw.FromAddress
+	} else {
+		publicKey = txRaw.ToAddress
+	}
+	if publicKey == "None" {
+		return nil
+	}
+
+	return &models.TransactionCountByAddress{
+		TransactionHash: txRaw.Hash,
+		PublicKey:       publicKey,
+		Count:           0, // Adds in loader
 	}
 }
