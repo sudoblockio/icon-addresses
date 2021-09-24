@@ -102,10 +102,15 @@ func transformTransactionRawToAddress(txRaw *models.TransactionRaw, useFromAddre
 		return nil
 	}
 
+	// Is Contract
+	isContract := false
+	if publicKey[:2] == "cx" {
+		isContract = true
+	}
+
 	return &models.Address{
-		PublicKey:        publicKey,
-		isContract:       false, // TODO
-		transactionCount: 0,     // TODO
+		PublicKey:  publicKey,
+		IsContract: isContract,
 	}
 }
 
