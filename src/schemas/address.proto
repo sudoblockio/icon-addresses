@@ -8,6 +8,5 @@ message Address {
   option (gorm.opts) = {ormable: true};
 
   string public_key = 1 [(gorm.field).tag = {primary_key: true}];
-  string current_balance_hex = 2;
-  double current_balance_dec = 3 [(gorm.field).tag = {index: "address_idx_current_balance_dec"}];
+  bool is_contract = 2 [(gorm.field).tag = {index: "address_idx_is_contract"}];
 }

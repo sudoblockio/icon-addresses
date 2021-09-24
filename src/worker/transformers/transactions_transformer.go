@@ -2,7 +2,6 @@ package transformers
 
 import (
 	"encoding/hex"
-	"math/big"
 
 	"github.com/golang/protobuf/proto"
 	"go.uber.org/zap"
@@ -12,7 +11,6 @@ import (
 	"github.com/geometry-labs/icon-addresses/kafka"
 	"github.com/geometry-labs/icon-addresses/metrics"
 	"github.com/geometry-labs/icon-addresses/models"
-	"github.com/geometry-labs/icon-addresses/worker/utils"
 )
 
 func StartTransactionsTransformer() {
@@ -104,37 +102,10 @@ func transformTransactionRawToAddress(txRaw *models.TransactionRaw, useFromAddre
 		return nil
 	}
 
-	// Current Balance Hex
-	currentBalanceHex, err := utils.IconNodeServiceGetBalanceOf(publicKey)
-	if err != nil {
-		zap.S().Fatal(err.Error())
-	}
-
-	// Current Balance Dec
-	currentBalanceDec := float64(0)
-	if currentBalanceHex != "0x0" {
-		currentBalanceDecBigInt, isSuccess := new(big.Int).SetString(currentBalanceHex[2:], 16)
-		if isSuccess == false {
-			zap.S().Fatal("Cannot parse string to big int, currentBalanceHex=", currentBalanceHex)
-		}
-		currentBalanceDecBigFloat := new(big.Float).SetInt(currentBalanceDecBigInt)
-
-		// 10^18
-		icxBaseBigInt, _ := new(big.Int).SetString("DE0B6B3A7640000", 16)
-		icxBaseBigFloat := new(big.Float).SetInt(icxBaseBigInt)
-
-		currentBalanceDecBigFloat = currentBalanceDecBigFloat.Quo(currentBalanceDecBigFloat, icxBaseBigFloat)
-
-		currentBalanceDec, _ = currentBalanceDecBigFloat.Float64()
-	} else {
-		// current balance is 0
-		currentBalanceDec = 0
-	}
-
 	return &models.Address{
-		PublicKey:         publicKey,
-		CurrentBalanceHex: currentBalanceHex,
-		CurrentBalanceDec: currentBalanceDec,
+		PublicKey:        publicKey,
+		isContract:       false, // TODO
+		transactionCount: 0,     // TODO
 	}
 }
 
