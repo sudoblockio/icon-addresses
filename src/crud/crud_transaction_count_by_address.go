@@ -66,7 +66,7 @@ func (m *TransactionCountByAddressModel) Insert(transactionCountByAddress *model
 }
 
 // Select - select from transactionCountByAddresss table
-func (m *TransactionCountByAddressModel) SelectOne(transactionHash string) (models.TransactionCountByAddress, error) {
+func (m *TransactionCountByAddressModel) SelectOne(transactionHash string, publicKey string) (models.TransactionCountByAddress, error) {
 	db := m.db
 
 	// Set table
@@ -74,6 +74,9 @@ func (m *TransactionCountByAddressModel) SelectOne(transactionHash string) (mode
 
 	// Transaction Hash
 	db = db.Where("transaction_hash = ?", transactionHash)
+
+	// Public Key
+	db = db.Where("public_key = ?", publicKey)
 
 	transactionCountByAddress := models.TransactionCountByAddress{}
 	db = db.First(&transactionCountByAddress)
@@ -108,6 +111,7 @@ func StartTransactionCountByAddressLoader() {
 			// Insert
 			_, err := GetTransactionCountByAddressModel().SelectOne(
 				newTransactionCountByAddress.TransactionHash,
+				newTransactionCountByAddress.PublicKey,
 			)
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				// Last count
@@ -128,6 +132,15 @@ func StartTransactionCountByAddressLoader() {
 				zap.S().Debug("Loader=TransactionCountByAddress, Address=", newTransactionCountByAddress.PublicKey, " - Insert")
 			} else if err != nil {
 				// Error
+				zap.S().Fatal(err.Error())
+			}
+
+			///////////////////////
+			// Force enrichments //
+			///////////////////////
+			err = reloadAddress(newTransactionCountByAddress.PublicKey)
+			if err != nil {
+				// Postgress error
 				zap.S().Fatal(err.Error())
 			}
 		}

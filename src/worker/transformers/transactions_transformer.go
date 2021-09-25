@@ -122,8 +122,10 @@ func transformTransactionRawToAddress(txRaw *models.TransactionRaw, useFromAddre
 	}
 
 	return &models.Address{
-		PublicKey:  publicKey,
-		IsContract: isContract,
+		PublicKey:        publicKey,
+		IsContract:       isContract,
+		TransactionCount: 0, // Enriched in loader
+		LogCount:         0, // Enriched in loader
 	}
 }
 

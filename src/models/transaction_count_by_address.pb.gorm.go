@@ -22,7 +22,7 @@ var _ = math.Inf
 
 type TransactionCountByAddressORM struct {
 	Count           uint64 `gorm:"index:transaction_count_by_address_idx_count"`
-	PublicKey       string `gorm:"index:transaction_count_by_address_idx_public_key"`
+	PublicKey       string `gorm:"primary_key"`
 	TransactionHash string `gorm:"primary_key"`
 }
 

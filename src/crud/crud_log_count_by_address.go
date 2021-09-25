@@ -134,6 +134,15 @@ func StartLogCountByAddressLoader() {
 				// Error
 				zap.S().Fatal(err.Error())
 			}
+
+			///////////////////////
+			// Force enrichments //
+			///////////////////////
+			err = reloadAddress(newLogCountByAddress.PublicKey)
+			if err != nil {
+				// Postgress error
+				zap.S().Fatal(err.Error())
+			}
 		}
 	}()
 }

@@ -132,11 +132,48 @@ func StartAddressLoader() {
 	go func() {
 
 		for {
-			// Read transaction
+			// Read address
 			newAddress := <-GetAddressModel().LoaderChannel
 
+			/////////////////
+			// Enrichments //
+			/////////////////
+			transactionCount := uint64(0)
+			logCount := uint64(0)
+
+			//////////////////////////////////
+			// Transaction Count By Address //
+			//////////////////////////////////
+
+			// transaction count
+			count, err := GetTransactionCountByAddressModel().SelectLargestCountByPublicKey(
+				newAddress.PublicKey,
+			)
+			if err != nil {
+				// Postgres error
+				zap.S().Fatal(err.Error())
+			}
+			transactionCount = count
+
+			//////////////////////////
+			// Log Count By Address //
+			//////////////////////////
+
+			// transaction count
+			count, err = GetLogCountByAddressModel().SelectLargestCountByPublicKey(
+				newAddress.PublicKey,
+			)
+			if err != nil {
+				// Postgres error
+				zap.S().Fatal(err.Error())
+			}
+			logCount = count
+
+			newAddress.TransactionCount = transactionCount
+			newAddress.LogCount = logCount
+
 			// Update/Insert
-			_, err := GetAddressModel().SelectOne(newAddress.PublicKey)
+			_, err = GetAddressModel().SelectOne(newAddress.PublicKey)
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 
 				// Insert
@@ -146,9 +183,26 @@ func StartAddressLoader() {
 				GetAddressModel().UpdateOne(newAddress)
 				zap.S().Debug("Loader=Address, Address=", newAddress.PublicKey, " - Updated")
 			} else {
-				// Postgress error
+				// Postgres error
 				zap.S().Fatal(err.Error())
 			}
 		}
 	}()
+}
+
+// reloadAddress - Send address back to loader for updates
+func reloadAddress(publicKey string) error {
+
+	curAddress, err := GetAddressModel().SelectOne(publicKey)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		// Create empty block
+		curAddress = &models.Address{}
+		curAddress.PublicKey = publicKey
+	} else if err != nil {
+		// Postgres error
+		return err
+	}
+	GetAddressModel().LoaderChannel <- curAddress
+
+	return nil
 }

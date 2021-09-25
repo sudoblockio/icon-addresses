@@ -8,6 +8,6 @@ message TransactionCountByAddress {
   option (gorm.opts) = {ormable: true};
 
   string transaction_hash = 1 [(gorm.field).tag = {primary_key: true}];
-  string public_key = 2 [(gorm.field).tag = {index: "transaction_count_by_address_idx_public_key"}];
+  string public_key = 2 [(gorm.field).tag = {primary_key: true}];
   uint64 count = 3 [(gorm.field).tag = {index: "transaction_count_by_address_idx_count"}];
 }
