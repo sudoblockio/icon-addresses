@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/geometry-labs/icon-addresses/config"
+
 	"github.com/Shopify/sarama"
 	log "github.com/sirupsen/logrus"
-
-	"github.com/geometry-labs/icon-addresses/config"
 )
 
 func init() {
@@ -17,7 +17,7 @@ func init() {
 
 func TestStartWorkerConsumers(t *testing.T) {
 
-	topicName := "logs"
+	topicName := "blocks"
 
 	// Mock broker
 	mockBrokerID := int32(1)
