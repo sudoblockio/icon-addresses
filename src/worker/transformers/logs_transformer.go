@@ -35,6 +35,7 @@ func logsTransformer() {
 
 		consumerTopicMsg := <-consumerTopicChanLogs
 		logRaw, err := convertBytesToLogRawProtoBuf(consumerTopicMsg.Value)
+		zap.S().Debug("Logs Transformer: Processing log in tx hash=", logRaw.TransactionHash)
 		if err != nil {
 			zap.S().Fatal("Logs Worker: Unable to proceed cannot convert kafka msg value to LogRaw, err: ", err.Error())
 		}
