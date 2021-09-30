@@ -44,10 +44,11 @@ type configType struct {
 	KafkaGroupID      string `envconfig:"KAFKA_GROUP_ID" required:"false" default:"addresses-service"`
 
 	// Topics
-	ConsumerGroup             string `envconfig:"CONSUMER_GROUP" required:"false" default:"addresses-consumer-group"`
-	ConsumerTopicBlocks       string `envconfig:"CONSUMER_TOPIC_BLOCKS" required:"false" default:"blocks"`
-	ConsumerTopicTransactions string `envconfig:"CONSUMER_TOPIC_TRANSACTIONS" required:"false" default:"transactions"`
-	ConsumerTopicLogs         string `envconfig:"CONSUMER_TOPIC_LOGS" required:"false" default:"logs"`
+	ConsumerGroup                string `envconfig:"CONSUMER_GROUP" required:"false" default:"addresses-consumer-group"`
+	ConsumerGroupBalanceStrategy string `envconfig:"CONSUMER_GROUP_BALANCE_STRATEGY" required:"false" default:"BalanceStrategyRange"`
+	ConsumerTopicBlocks          string `envconfig:"CONSUMER_TOPIC_BLOCKS" required:"false" default:"blocks"`
+	ConsumerTopicTransactions    string `envconfig:"CONSUMER_TOPIC_TRANSACTIONS" required:"false" default:"transactions"`
+	ConsumerTopicLogs            string `envconfig:"CONSUMER_TOPIC_LOGS" required:"false" default:"logs"`
 
 	// DB
 	DbDriver   string `envconfig:"DB_DRIVER" required:"false" default:"postgres"`
