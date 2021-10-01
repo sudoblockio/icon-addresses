@@ -2,12 +2,15 @@ package crud
 
 import (
 	"fmt"
+	"log"
+	"os"
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 
 	"github.com/geometry-labs/icon-addresses/config"
 )
@@ -69,7 +72,7 @@ func retryGetPostgresSession(dsn string) (*gorm.DB, error) {
 		}
 		return err
 	}
-	neb := backoff.NewConstantBackOff(time.Second * 3)
+	neb := backoff.NewExponentialBackOff()
 	err := backoff.Retry(operation, neb)
 	return session, err
 }

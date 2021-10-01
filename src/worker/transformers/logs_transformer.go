@@ -25,6 +25,7 @@ func logsTransformer() {
 
 	// Output channels
 	logCountByAddressLoaderChan := crud.GetLogCountByAddressModel().LoaderChannel
+	logCountByBlockNumberLoaderChan := crud.GetLogCountByBlockNumberModel().LoaderChannel
 
 	zap.S().Debug("Logs Worker: started working")
 	for {
@@ -47,6 +48,10 @@ func logsTransformer() {
 		// Loads to log_count_by_addresses
 		logCountByAddressFromAddress := transformLogRawToLogCountByAddress(logRaw)
 		logCountByAddressLoaderChan <- logCountByAddressFromAddress
+
+		// Loads to log_count_by_block_number
+		logCountByBlockNumber := transformLogRawToLogCountByBlockNumber(logRaw)
+		logCountByBlockNumberLoaderChan <- logCountByBlockNumber
 
 		/////////////
 		// Metrics //
@@ -72,5 +77,16 @@ func transformLogRawToLogCountByAddress(logRaw *models.LogRaw) *models.LogCountB
 		LogIndex:        logRaw.LogIndex,
 		PublicKey:       logRaw.Address,
 		Count:           0, // Adds in loader
+	}
+}
+
+func transformLogRawToLogCountByBlockNumber(logRaw *models.LogRaw) *models.LogCountByBlockNumber {
+
+	return &models.LogCountByBlockNumber{
+		TransactionHash:       logRaw.TransactionHash,
+		LogIndex:              logRaw.LogIndex,
+		BlockNumber:           uint32(logRaw.BlockNumber),
+		Count:                 0, // Adds in loader
+		MaxCountByTransaction: uint32(logRaw.MaxLogIndex),
 	}
 }

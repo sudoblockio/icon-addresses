@@ -27,6 +27,7 @@ func transactionsTransformer() {
 	addressLoaderChan := crud.GetAddressModel().LoaderChannel
 	addressCountLoaderChan := crud.GetAddressCountModel().LoaderChannel
 	transactionCountByAddressLoaderChan := crud.GetTransactionCountByAddressModel().LoaderChannel
+	transactionCountByBlockNumberLoaderChan := crud.GetTransactionCountByBlockNumberModel().LoaderChannel
 
 	zap.S().Debug("Transactions Transformer: started working")
 
@@ -82,6 +83,10 @@ func transactionsTransformer() {
 		if transactionCountByAddressToAddress != nil {
 			transactionCountByAddressLoaderChan <- transactionCountByAddressToAddress
 		}
+
+		// Loads to transaction_count_by_block_number
+		transactionCountByBlockNumber := transformTransactionRawTransactionCountByBlockNumber(transactionRaw)
+		transactionCountByBlockNumberLoaderChan <- transactionCountByBlockNumber
 
 		/////////////
 		// Metrics //
@@ -154,6 +159,14 @@ func transformTransactionRawToTransactionCountByAddress(txRaw *models.Transactio
 	return &models.TransactionCountByAddress{
 		TransactionHash: txRaw.Hash,
 		PublicKey:       publicKey,
+		Count:           0, // Adds in loader
+	}
+}
+func transformTransactionRawTransactionCountByBlockNumber(txRaw *models.TransactionRaw) *models.TransactionCountByBlockNumber {
+
+	return &models.TransactionCountByBlockNumber{
+		BlockNumber:     uint32(txRaw.BlockNumber),
+		TransactionHash: txRaw.Hash,
 		Count:           0, // Adds in loader
 	}
 }

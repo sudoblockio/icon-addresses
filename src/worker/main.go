@@ -24,6 +24,7 @@ func main() {
 	kafka.StartWorkerConsumers()
 
 	// Start transformers
+	transformers.StartBlocksTransformer()
 	transformers.StartTransactionsTransformer()
 	transformers.StartLogsTransformer()
 
