@@ -2,10 +2,12 @@ package crud
 
 import (
 	"errors"
+	"reflect"
 	"sync"
 
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"github.com/geometry-labs/icon-addresses/models"
 )
@@ -127,6 +129,111 @@ func (m *AddressModel) SelectMany(
 	return addresses, db.Error
 }
 
+func (m *AddressModel) UpsertOne(
+	address *models.Address,
+) error {
+	db := m.db
+
+	// Create map[]interface{} with only non-nil fields
+	updateOnConflictValues := map[string]interface{}{}
+
+	// Loop through struct using reflect package
+	modelValueOf := reflect.ValueOf(*address)
+	modelTypeOf := reflect.TypeOf(*address)
+	for i := 0; i < modelValueOf.NumField(); i++ {
+		modelField := modelValueOf.Field(i)
+		modelType := modelTypeOf.Field(i)
+
+		modelTypeJSONTag := modelType.Tag.Get("json")
+		if modelTypeJSONTag != "" {
+			// exported field
+
+			// Check if field if filled
+			modelFieldKind := modelField.Kind()
+			isFieldFilled := true
+			switch modelFieldKind {
+			case reflect.String:
+				v := modelField.Interface().(string)
+				if v == "" {
+					isFieldFilled = false
+				}
+			case reflect.Int:
+				v := modelField.Interface().(int)
+				if v == 0 {
+					isFieldFilled = false
+				}
+			case reflect.Int8:
+				v := modelField.Interface().(int8)
+				if v == 0 {
+					isFieldFilled = false
+				}
+			case reflect.Int16:
+				v := modelField.Interface().(int16)
+				if v == 0 {
+					isFieldFilled = false
+				}
+			case reflect.Int32:
+				v := modelField.Interface().(int32)
+				if v == 0 {
+					isFieldFilled = false
+				}
+			case reflect.Int64:
+				v := modelField.Interface().(int64)
+				if v == 0 {
+					isFieldFilled = false
+				}
+			case reflect.Uint:
+				v := modelField.Interface().(uint)
+				if v == 0 {
+					isFieldFilled = false
+				}
+			case reflect.Uint8:
+				v := modelField.Interface().(uint8)
+				if v == 0 {
+					isFieldFilled = false
+				}
+			case reflect.Uint16:
+				v := modelField.Interface().(uint16)
+				if v == 0 {
+					isFieldFilled = false
+				}
+			case reflect.Uint32:
+				v := modelField.Interface().(uint32)
+				if v == 0 {
+					isFieldFilled = false
+				}
+			case reflect.Uint64:
+				v := modelField.Interface().(uint64)
+				if v == 0 {
+					isFieldFilled = false
+				}
+			case reflect.Float32:
+				v := modelField.Interface().(float32)
+				if v == 0 {
+					isFieldFilled = false
+				}
+			case reflect.Float64:
+				v := modelField.Interface().(float64)
+				if v == 0 {
+					isFieldFilled = false
+				}
+			}
+
+			if isFieldFilled == true {
+				updateOnConflictValues[modelTypeJSONTag] = modelField.Interface()
+			}
+		}
+	}
+
+	// Upsert
+	db = db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "public_key"}}, // NOTE set to primary keys for table
+		DoUpdates: clause.Assignments(updateOnConflictValues),
+	}).Create(address)
+
+	return db.Error
+}
+
 // StartAddressLoader starts loader
 func StartAddressLoader() {
 	go func() {
@@ -172,20 +279,17 @@ func StartAddressLoader() {
 			newAddress.TransactionCount = transactionCount
 			newAddress.LogCount = logCount
 
-			// Update/Insert
-			_, err = GetAddressModel().SelectOne(newAddress.PublicKey)
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-
-				// Insert
-				GetAddressModel().Insert(newAddress)
-			} else if err == nil {
-				// Update
-				GetAddressModel().UpdateOne(newAddress)
-				zap.S().Debug("Loader=Address, Address=", newAddress.PublicKey, " - Updated")
-			} else {
+			//////////////////////
+			// Load to postgres //
+			//////////////////////
+			err = GetAddressModel().UpsertOne(newAddress)
+			zap.S().Debug("Loader=Address, Address=", newAddress.PublicKey, " - Upsert")
+			if err != nil {
 				// Postgres error
+				zap.S().Info("Loader=Address, Address=", newAddress.PublicKey, " - FATAL")
 				zap.S().Fatal(err.Error())
 			}
+
 		}
 	}()
 }

@@ -2,12 +2,14 @@ package crud
 
 import (
 	"errors"
+	"reflect"
 	"strings"
 	"sync"
 
 	"github.com/cenkalti/backoff/v4"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"github.com/geometry-labs/icon-addresses/models"
 )
@@ -98,6 +100,111 @@ func (m *BlockModel) UpdateOne(
 	return db.Error
 }
 
+func (m *BlockModel) UpsertOne(
+	block *models.Block,
+) error {
+	db := m.db
+
+	// Create map[]interface{} with only non-nil fields
+	updateOnConflictValues := map[string]interface{}{}
+
+	// Loop through struct using reflect package
+	modelValueOf := reflect.ValueOf(*block)
+	modelTypeOf := reflect.TypeOf(*block)
+	for i := 0; i < modelValueOf.NumField(); i++ {
+		modelField := modelValueOf.Field(i)
+		modelType := modelTypeOf.Field(i)
+
+		modelTypeJSONTag := modelType.Tag.Get("json")
+		if modelTypeJSONTag != "" {
+			// exported field
+
+			// Check if field if filled
+			modelFieldKind := modelField.Kind()
+			isFieldFilled := true
+			switch modelFieldKind {
+			case reflect.String:
+				v := modelField.Interface().(string)
+				if v == "" {
+					isFieldFilled = false
+				}
+			case reflect.Int:
+				v := modelField.Interface().(int)
+				if v == 0 {
+					isFieldFilled = false
+				}
+			case reflect.Int8:
+				v := modelField.Interface().(int8)
+				if v == 0 {
+					isFieldFilled = false
+				}
+			case reflect.Int16:
+				v := modelField.Interface().(int16)
+				if v == 0 {
+					isFieldFilled = false
+				}
+			case reflect.Int32:
+				v := modelField.Interface().(int32)
+				if v == 0 {
+					isFieldFilled = false
+				}
+			case reflect.Int64:
+				v := modelField.Interface().(int64)
+				if v == 0 {
+					isFieldFilled = false
+				}
+			case reflect.Uint:
+				v := modelField.Interface().(uint)
+				if v == 0 {
+					isFieldFilled = false
+				}
+			case reflect.Uint8:
+				v := modelField.Interface().(uint8)
+				if v == 0 {
+					isFieldFilled = false
+				}
+			case reflect.Uint16:
+				v := modelField.Interface().(uint16)
+				if v == 0 {
+					isFieldFilled = false
+				}
+			case reflect.Uint32:
+				v := modelField.Interface().(uint32)
+				if v == 0 {
+					isFieldFilled = false
+				}
+			case reflect.Uint64:
+				v := modelField.Interface().(uint64)
+				if v == 0 {
+					isFieldFilled = false
+				}
+			case reflect.Float32:
+				v := modelField.Interface().(float32)
+				if v == 0 {
+					isFieldFilled = false
+				}
+			case reflect.Float64:
+				v := modelField.Interface().(float64)
+				if v == 0 {
+					isFieldFilled = false
+				}
+			}
+
+			if isFieldFilled == true {
+				updateOnConflictValues[modelTypeJSONTag] = modelField.Interface()
+			}
+		}
+	}
+
+	// Upsert
+	db = db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "number"}}, // NOTE set to primary keys for table
+		DoUpdates: clause.Assignments(updateOnConflictValues),
+	}).Create(block)
+
+	return db.Error
+}
+
 // StartBlockLoader starts loader
 func StartBlockLoader() {
 	go func() {
@@ -138,16 +245,11 @@ func StartBlockLoader() {
 			//////////////////////
 			// Load to postgres //
 			//////////////////////
-			_, err = GetBlockModel().SelectOne(newBlock.Number)
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				// Insert
-				GetBlockModel().Insert(newBlock)
-			} else if err == nil {
-				// Update
-				GetBlockModel().UpdateOne(newBlock)
-				zap.S().Debug("Loader=Block, Number=", newBlock.Number, " - Updated")
-			} else {
+			err = GetBlockModel().UpsertOne(newBlock)
+			zap.S().Debug("Loader=Block, Number=", newBlock.Number, " - Upserted")
+			if err != nil {
 				// Postgres error
+				zap.S().Info("Loader=Block, Number=", newBlock.Number, " - FATAL")
 				zap.S().Fatal(err.Error())
 			}
 		}
