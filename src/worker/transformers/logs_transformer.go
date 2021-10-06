@@ -27,6 +27,7 @@ func logsTransformer() {
 
 	// Output channels
 	addressLoaderChan := crud.GetAddressModel().LoaderChannel
+	transactionLoaderChan := crud.GetTransactionModel().LoaderChannel
 	logCountByAddressLoaderChan := crud.GetLogCountByAddressModel().LoaderChannel
 	logCountByBlockNumberLoaderChan := crud.GetLogCountByBlockNumberModel().LoaderChannel
 
@@ -60,6 +61,11 @@ func logsTransformer() {
 			addressLoaderChan <- toAddress
 		}
 
+		transaction := transformLogRawToTransaction(logRaw)
+		if transaction != nil {
+			transactionLoaderChan <- transaction
+		}
+
 		// Loads to log_count_by_addresses
 		logCountByAddressFromAddress := transformLogRawToLogCountByAddress(logRaw)
 		logCountByAddressLoaderChan <- logCountByAddressFromAddress
@@ -85,7 +91,6 @@ func convertBytesToLogRawProtoBuf(value []byte) (*models.LogRaw, error) {
 	return &log, err
 }
 
-// Business logic goes here
 func transformLogRawToAddress(logRaw *models.LogRaw, useFromAddress bool) *models.Address {
 
 	var indexed []string
@@ -121,6 +126,37 @@ func transformLogRawToAddress(logRaw *models.LogRaw, useFromAddress bool) *model
 		IsContract:       isContract,
 		TransactionCount: 0, // Enriched in loader
 		LogCount:         0, // Enriched in loader
+	}
+}
+
+func transformLogRawToTransaction(logRaw *models.LogRaw) *models.Transaction {
+
+	var indexed []string
+	err := json.Unmarshal([]byte(logRaw.Indexed), &indexed)
+	if err != nil {
+		zap.S().Fatal("Unable to parse indexed field in log; indexed=", logRaw.Indexed, " error: ", err.Error())
+	}
+
+	method := strings.Split(indexed[0], "(")[0]
+
+	if method != "ICXTransfer" {
+		// Not internal transaction
+		return nil
+	}
+
+	// indexed[3] = value
+	if indexed[3] == "0x0" {
+		// No value transaction
+		return nil
+	}
+
+	return &models.Transaction{
+		FromAddress: indexed[1],
+		ToAddress:   indexed[2],
+		Value:       indexed[3],
+		Hash:        logRaw.TransactionHash,
+		BlockNumber: logRaw.BlockNumber,
+		LogIndex:    int32(logRaw.LogIndex),
 	}
 }
 

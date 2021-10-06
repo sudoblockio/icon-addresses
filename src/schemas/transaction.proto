@@ -1,0 +1,19 @@
+syntax = "proto3";
+package models;
+option go_package = "./models";
+
+import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
+
+message Transaction {
+  option (gorm.opts) = {ormable: true};
+
+  string from_address = 1 [(gorm.field).tag = {index: "transaction_idx_from_address"}];
+  string to_address = 2 [(gorm.field).tag = {index: "transaction_idx_to_address"}];
+  string value = 3;
+  string hash = 4 [(gorm.field).tag = {primary_key: true}];
+  uint64 block_number = 5 [(gorm.field).tag = {index: "transaction_idx_block_number"}];
+
+  // Used to key internal transactions
+  // Base transactions have a -1 value
+  int32  log_index = 6 [(gorm.field).tag = {primary_key: true}];
+}

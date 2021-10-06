@@ -26,6 +26,7 @@ func transactionsTransformer() {
 	// Output channels
 	addressLoaderChan := crud.GetAddressModel().LoaderChannel
 	addressCountLoaderChan := crud.GetAddressCountModel().LoaderChannel
+	transactionLoaderChan := crud.GetTransactionModel().LoaderChannel
 	transactionCountByAddressLoaderChan := crud.GetTransactionCountByAddressModel().LoaderChannel
 	transactionCountByBlockNumberLoaderChan := crud.GetTransactionCountByBlockNumberModel().LoaderChannel
 
@@ -48,28 +49,34 @@ func transactionsTransformer() {
 		// Loaders //
 		/////////////
 
-		// Loads to: addresses (from address)
+		// Loads to addresses (from address)
 		fromAddress := transformTransactionRawToAddress(transactionRaw, true)
 		if fromAddress != nil {
 			addressLoaderChan <- fromAddress
 		}
 
-		// Loads to: addresses (to address)
+		// Loads to addresses (to address)
 		toAddress := transformTransactionRawToAddress(transactionRaw, false)
 		if toAddress != nil {
 			addressLoaderChan <- toAddress
 		}
 
-		// Loads to: addresses_count (from address)
+		// Loads to addresses_count (from address)
 		if fromAddress != nil {
 			fromAddressCount := transformAddressToAddressCount(fromAddress)
 			addressCountLoaderChan <- fromAddressCount
 		}
 
-		// Loads to: addresses_count (to address)
+		// Loads to addresses_count (to address)
 		if toAddress != nil {
 			toAddressCount := transformAddressToAddressCount(toAddress)
 			addressCountLoaderChan <- toAddressCount
+		}
+
+		// Loads to transactions
+		transaction := transformTransactionRawToTransaction(transactionRaw)
+		if transaction != nil {
+			transactionLoaderChan <- transaction
 		}
 
 		// Loads to transaction_count_by_addresses (from address)
@@ -105,7 +112,6 @@ func convertBytesToTransactionRawProtoBuf(value []byte) (*models.TransactionRaw,
 	return &tx, err
 }
 
-// Business logic goes here
 func transformTransactionRawToAddress(txRaw *models.TransactionRaw, useFromAddress bool) *models.Address {
 
 	// Public Key
@@ -141,7 +147,23 @@ func transformAddressToAddressCount(address *models.Address) *models.AddressCoun
 	}
 }
 
-// Business logic goes here
+func transformTransactionRawToTransaction(txRaw *models.TransactionRaw) *models.Transaction {
+
+	if txRaw.Value == "0x0" {
+		// No value transaction
+		return nil
+	}
+
+	return &models.Transaction{
+		FromAddress: txRaw.FromAddress,
+		ToAddress:   txRaw.ToAddress,
+		Value:       txRaw.Value,
+		Hash:        txRaw.Hash,
+		BlockNumber: txRaw.BlockNumber,
+		LogIndex:    -1,
+	}
+}
+
 func transformTransactionRawToTransactionCountByAddress(txRaw *models.TransactionRaw, useFromAddress bool) *models.TransactionCountByAddress {
 
 	// Public Key
