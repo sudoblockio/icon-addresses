@@ -2,6 +2,8 @@ package transformers
 
 import (
 	"encoding/hex"
+	"encoding/json"
+	"strings"
 
 	"github.com/golang/protobuf/proto"
 	"go.uber.org/zap"
@@ -24,6 +26,7 @@ func logsTransformer() {
 	consumerTopicChanLogs := kafka.KafkaTopicConsumers[consumerTopicNameLogs].TopicChannel
 
 	// Output channels
+	addressLoaderChan := crud.GetAddressModel().LoaderChannel
 	logCountByAddressLoaderChan := crud.GetLogCountByAddressModel().LoaderChannel
 	logCountByBlockNumberLoaderChan := crud.GetLogCountByBlockNumberModel().LoaderChannel
 
@@ -44,6 +47,18 @@ func logsTransformer() {
 		/////////////
 		// Loaders //
 		/////////////
+
+		// Loads to addresses (from address)
+		fromAddress := transformLogRawToAddress(logRaw, true)
+		if fromAddress != nil {
+			addressLoaderChan <- fromAddress
+		}
+
+		// Loads to addresses (to address)
+		toAddress := transformLogRawToAddress(logRaw, false)
+		if toAddress != nil {
+			addressLoaderChan <- toAddress
+		}
 
 		// Loads to log_count_by_addresses
 		logCountByAddressFromAddress := transformLogRawToLogCountByAddress(logRaw)
@@ -68,6 +83,45 @@ func convertBytesToLogRawProtoBuf(value []byte) (*models.LogRaw, error) {
 		zap.S().Error("Value=", hex.Dump(value[6:]))
 	}
 	return &log, err
+}
+
+// Business logic goes here
+func transformLogRawToAddress(logRaw *models.LogRaw, useFromAddress bool) *models.Address {
+
+	var indexed []string
+	err := json.Unmarshal([]byte(logRaw.Indexed), &indexed)
+	if err != nil {
+		zap.S().Fatal("Unable to parse indexed field in log; indexed=", logRaw.Indexed, " error: ", err.Error())
+	}
+
+	method := strings.Split(indexed[0], "(")[0]
+
+	if method != "ICXTransfer" {
+		// Not internal transaction
+		return nil
+	}
+
+	// Public Key
+	publicKey := ""
+
+	if useFromAddress == true {
+		publicKey = indexed[1]
+	} else {
+		publicKey = indexed[2]
+	}
+
+	// Is Contract
+	isContract := false
+	if publicKey[:2] == "cx" {
+		isContract = true
+	}
+
+	return &models.Address{
+		PublicKey:        publicKey,
+		IsContract:       isContract,
+		TransactionCount: 0, // Enriched in loader
+		LogCount:         0, // Enriched in loader
+	}
 }
 
 func transformLogRawToLogCountByAddress(logRaw *models.LogRaw) *models.LogCountByAddress {
