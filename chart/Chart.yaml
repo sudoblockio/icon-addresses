@@ -1,6 +1,6 @@
 apiVersion: v2
-name: icon-logs
-description: Chart to ICON Blockchain Logs Service
+name: icon-addresses
+description: Chart to ICON Blockchain Addresses Service
 type: application
 version: 0.0.1
 appVersion: 0.1.0

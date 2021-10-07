@@ -2,7 +2,7 @@
 apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ .Release.Name }}
+  name: {{ .Release.Name }}-api
   labels:
 {{ include "labels" . | indent 6 }}
 
@@ -12,8 +12,18 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ .Release.Name }}
+    name: {{ .Release.Name }}-api
   metrics:
+    - type: Object
+      object:
+        describedObject:
+          kind: Service
+          name: {{ .Release.Name }}
+        metric:
+          name: envoy_upstream_active_requests
+        target:
+          type: Value
+          value: "100"
     - type: Resource
       resource:
         name: cpu
