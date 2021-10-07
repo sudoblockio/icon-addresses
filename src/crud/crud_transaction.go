@@ -72,6 +72,27 @@ func (m *TransactionModel) Insert(transaction *models.Transaction) error {
 	return err
 }
 
+// SelectManyByBlockNumber - select many by block number
+func (m *TransactionModel) SelectManyByBlockNumber(
+	blockNumber uint64,
+) (*[]models.Transaction, error) {
+	db := m.db
+
+	// Set table
+	db = db.Model(&models.Transaction{})
+
+	// Order by transaction index, log index
+	db = db.Order("transaction_index ASC, log_index ASC")
+
+	// Block Number
+	db = db.Where("block_number = ?", blockNumber)
+
+	transactions := &[]models.Transaction{}
+	db = db.Find(transactions)
+
+	return transactions, db.Error
+}
+
 // UpdateOne - update one from transactions table
 func (m *TransactionModel) UpdateOne(
 	transaction *models.Transaction,

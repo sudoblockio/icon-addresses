@@ -136,7 +136,7 @@ func StartBlockLoader() {
 			////////////////////////
 			// Log Count By Block //
 			////////////////////////
-			allLogCountsByBlockNumber, err := GetLogCountByBlockNumberModel().SelectManyByBlockNumber(newBlock.Number)
+			allLogCountsByBlockNumber, err := GetLogCountByBlockNumberModel().SelectManyByBlockNumber(uint64(newBlock.Number))
 			if err != nil {
 				// Postgres error
 				zap.S().Fatal(err.Error())

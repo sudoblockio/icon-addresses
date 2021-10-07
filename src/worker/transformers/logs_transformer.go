@@ -151,12 +151,14 @@ func transformLogRawToTransaction(logRaw *models.LogRaw) *models.Transaction {
 	}
 
 	return &models.Transaction{
-		FromAddress: indexed[1],
-		ToAddress:   indexed[2],
-		Value:       indexed[3],
-		Hash:        logRaw.TransactionHash,
-		BlockNumber: logRaw.BlockNumber,
-		LogIndex:    int32(logRaw.LogIndex),
+		FromAddress:      indexed[1],
+		ToAddress:        indexed[2],
+		Value:            indexed[3],
+		Hash:             logRaw.TransactionHash,
+		BlockNumber:      logRaw.BlockNumber,
+		TransactionIndex: logRaw.TransactionIndex,
+		BlockTimestamp:   logRaw.BlockTimestamp,
+		LogIndex:         int32(logRaw.LogIndex),
 	}
 }
 
@@ -175,7 +177,7 @@ func transformLogRawToLogCountByBlockNumber(logRaw *models.LogRaw) *models.LogCo
 	return &models.LogCountByBlockNumber{
 		TransactionHash:       logRaw.TransactionHash,
 		LogIndex:              logRaw.LogIndex,
-		BlockNumber:           uint32(logRaw.BlockNumber),
+		BlockNumber:           logRaw.BlockNumber,
 		Count:                 0, // Adds in loader
 		MaxCountByTransaction: uint32(logRaw.MaxLogIndex),
 	}

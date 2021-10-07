@@ -155,12 +155,14 @@ func transformTransactionRawToTransaction(txRaw *models.TransactionRaw) *models.
 	}
 
 	return &models.Transaction{
-		FromAddress: txRaw.FromAddress,
-		ToAddress:   txRaw.ToAddress,
-		Value:       txRaw.Value,
-		Hash:        txRaw.Hash,
-		BlockNumber: txRaw.BlockNumber,
-		LogIndex:    -1,
+		FromAddress:      txRaw.FromAddress,
+		ToAddress:        txRaw.ToAddress,
+		Value:            txRaw.Value,
+		Hash:             txRaw.Hash,
+		BlockNumber:      txRaw.BlockNumber,
+		TransactionIndex: txRaw.TransactionIndex,
+		BlockTimestamp:   txRaw.BlockTimestamp,
+		LogIndex:         -1,
 	}
 }
 
@@ -187,7 +189,7 @@ func transformTransactionRawToTransactionCountByAddress(txRaw *models.Transactio
 func transformTransactionRawTransactionCountByBlockNumber(txRaw *models.TransactionRaw) *models.TransactionCountByBlockNumber {
 
 	return &models.TransactionCountByBlockNumber{
-		BlockNumber:     uint32(txRaw.BlockNumber),
+		BlockNumber:     txRaw.BlockNumber,
 		TransactionHash: txRaw.Hash,
 		Count:           0, // Adds in loader
 	}

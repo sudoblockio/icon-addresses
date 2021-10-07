@@ -21,7 +21,7 @@ var _ = fmt.Errorf
 var _ = math.Inf
 
 type LogCountByBlockNumberORM struct {
-	BlockNumber           uint32 `gorm:"index:log_count_by_block_count_idx_block_count"`
+	BlockNumber           uint64 `gorm:"index:log_count_by_block_count_idx_block_count"`
 	Count                 uint32
 	LogIndex              uint64 `gorm:"primary_key"`
 	MaxCountByTransaction uint32

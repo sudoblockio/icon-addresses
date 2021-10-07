@@ -85,7 +85,7 @@ func (m *LogCountByBlockNumberModel) SelectOne(transactionHash string, logIndex 
 }
 
 // SelectManyByBlockNumber - select from logCountByBlockNumbers table
-func (m *LogCountByBlockNumberModel) SelectManyByBlockNumber(blockNumber uint32) ([]models.LogCountByBlockNumber, error) {
+func (m *LogCountByBlockNumberModel) SelectManyByBlockNumber(blockNumber uint64) ([]models.LogCountByBlockNumber, error) {
 	db := m.db
 
 	// Set table
@@ -100,7 +100,7 @@ func (m *LogCountByBlockNumberModel) SelectManyByBlockNumber(blockNumber uint32)
 	return logCountByBlockNumber, db.Error
 }
 
-func (m *LogCountByBlockNumberModel) SelectLargestCountByBlockNumber(blockNumber uint32) (uint64, error) {
+func (m *LogCountByBlockNumberModel) SelectLargestCountByBlockNumber(blockNumber uint64) (uint64, error) {
 	db := m.db
 
 	// Set table
@@ -155,7 +155,7 @@ func StartLogCountByBlockNumberLoader() {
 			///////////////////////
 			// Force enrichments //
 			///////////////////////
-			err = reloadBlock(newLogCountByBlockNumber.BlockNumber)
+			err = reloadBlock(uint32(newLogCountByBlockNumber.BlockNumber))
 			if err != nil {
 				// Postgress error
 				zap.S().Fatal(err.Error())

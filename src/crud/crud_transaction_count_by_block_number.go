@@ -81,7 +81,7 @@ func (m *TransactionCountByBlockNumberModel) SelectOne(transactionHash string) (
 	return transactionCountByBlockNumber, db.Error
 }
 
-func (m *TransactionCountByBlockNumberModel) SelectLargestCountByBlockNumber(blockNumber uint32) (uint64, error) {
+func (m *TransactionCountByBlockNumberModel) SelectLargestCountByBlockNumber(blockNumber uint64) (uint64, error) {
 	db := m.db
 
 	// Set table
