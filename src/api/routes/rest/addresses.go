@@ -35,7 +35,7 @@ func AddressesAddHandlers(app *fiber.App) {
 // @Param skip query int false "skip to a record"
 // @Param is_contract query bool false "contract addresses only"
 // @Router /api/v1/addresses [get]
-// @Success 200 {object} []models.Address
+// @Success 200 {object} []models.AddressAPIList
 // @Failure 422 {object} map[string]interface{}
 func handlerGetAddresses(c *fiber.Ctx) error {
 	params := new(AddressesQuery)
@@ -58,7 +58,7 @@ func handlerGetAddresses(c *fiber.Ctx) error {
 	}
 
 	// Get Addresses
-	addresses, err := crud.GetAddressModel().SelectMany(
+	addresses, err := crud.GetAddressModel().SelectManyAPI(
 		params.Limit,
 		params.Skip,
 		params.IsContract,

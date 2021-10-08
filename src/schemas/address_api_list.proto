@@ -1,0 +1,10 @@
+syntax = "proto3";
+package models;
+option go_package = "./models";
+
+message AddressAPIList {
+
+  string public_key = 1;
+  uint64 transaction_count = 2;
+  double balance = 3;
+}
