@@ -158,6 +158,7 @@ func transformLogRawToTransaction(logRaw *models.LogRaw) *models.Transaction {
 		BlockNumber:      logRaw.BlockNumber,
 		TransactionIndex: logRaw.TransactionIndex,
 		BlockTimestamp:   logRaw.BlockTimestamp,
+		TransactionFee:   "0x0", // No fees for internal transactions
 		LogIndex:         int32(logRaw.LogIndex),
 	}
 }

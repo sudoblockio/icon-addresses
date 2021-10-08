@@ -14,8 +14,9 @@ message Transaction {
   uint64 block_number = 5 [(gorm.field).tag = {index: "transaction_idx_block_number"}];
   uint32 transaction_index = 6;
   uint64 block_timestamp = 7;
+  string transaction_fee = 8;
 
   // Used to key internal transactions
   // Base transactions have a -1 value
-  int32  log_index = 8 [(gorm.field).tag = {primary_key: true}];
+  int32  log_index = 9 [(gorm.field).tag = {primary_key: true}];
 }

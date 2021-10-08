@@ -20,5 +20,6 @@ message Balance {
   int32  log_index = 3 [(gorm.field).tag = {primary_key: true}];
   string public_key = 4 [(gorm.field).tag = {primary_key: true}];
   string value = 5;
-  uint64 timestamp = 6 [(gorm.field).tag = {index: "balance_idx_timestamp"}];
+  double value_decimal = 6;
+  uint64 timestamp = 7 [(gorm.field).tag = {index: "balance_idx_timestamp"}];
 }

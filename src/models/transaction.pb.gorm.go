@@ -27,6 +27,7 @@ type TransactionORM struct {
 	Hash             string `gorm:"primary_key"`
 	LogIndex         int32  `gorm:"primary_key"`
 	ToAddress        string `gorm:"index:transaction_idx_to_address"`
+	TransactionFee   string
 	TransactionIndex uint32
 	Value            string
 }
@@ -53,6 +54,7 @@ func (m *Transaction) ToORM(ctx context.Context) (TransactionORM, error) {
 	to.BlockNumber = m.BlockNumber
 	to.TransactionIndex = m.TransactionIndex
 	to.BlockTimestamp = m.BlockTimestamp
+	to.TransactionFee = m.TransactionFee
 	to.LogIndex = m.LogIndex
 	if posthook, ok := interface{}(m).(TransactionWithAfterToORM); ok {
 		err = posthook.AfterToORM(ctx, &to)
@@ -77,6 +79,7 @@ func (m *TransactionORM) ToPB(ctx context.Context) (Transaction, error) {
 	to.BlockNumber = m.BlockNumber
 	to.TransactionIndex = m.TransactionIndex
 	to.BlockTimestamp = m.BlockTimestamp
+	to.TransactionFee = m.TransactionFee
 	to.LogIndex = m.LogIndex
 	if posthook, ok := interface{}(m).(TransactionWithAfterToPB); ok {
 		err = posthook.AfterToPB(ctx, &to)
@@ -175,6 +178,10 @@ func DefaultApplyFieldMaskTransaction(ctx context.Context, patchee *Transaction,
 		}
 		if f == prefix+"BlockTimestamp" {
 			patchee.BlockTimestamp = patcher.BlockTimestamp
+			continue
+		}
+		if f == prefix+"TransactionFee" {
+			patchee.TransactionFee = patcher.TransactionFee
 			continue
 		}
 		if f == prefix+"LogIndex" {
