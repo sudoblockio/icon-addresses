@@ -1,54 +1,179 @@
 package kafka
 
 import (
-	"os"
-	"testing"
+	"context"
 	"time"
 
-	"github.com/geometry-labs/icon-addresses/config"
-
 	"github.com/Shopify/sarama"
-	log "github.com/sirupsen/logrus"
+	"go.uber.org/zap"
+
+	"github.com/geometry-labs/icon-addresses/config"
 )
 
-func init() {
-	config.ReadEnvironment()
+type kafkaTopicConsumer struct {
+	brokerURL    string
+	topicName    string
+	TopicChannel chan *sarama.ConsumerMessage
 }
 
-func TestStartWorkerConsumers(t *testing.T) {
+var KafkaTopicConsumers map[string]*kafkaTopicConsumer
 
-	topicName := "blocks"
+// StartWorkerConsumers - start consumer goroutines for Worker config
+func StartWorkerConsumers() {
 
-	// Mock broker
-	mockBrokerID := int32(1)
-	mockBroker := sarama.NewMockBroker(t, mockBrokerID)
-	defer mockBroker.Close()
+	consumerTopicNameBlocks := config.Config.ConsumerTopicBlocks
+	consumerTopicNameTransactions := config.Config.ConsumerTopicTransactions
+	consumerTopicNameLogs := config.Config.ConsumerTopicLogs
 
-	mockBroker.SetHandlerByMap(map[string]sarama.MockResponse{
-		"MetadataRequest": sarama.NewMockMetadataResponse(t).
-			SetBroker(mockBroker.Addr(), mockBroker.BrokerID()).
-			SetLeader(topicName, 0, mockBroker.BrokerID()),
-		"OffsetRequest": sarama.NewMockOffsetResponse(t).
-			SetOffset(topicName, 0, sarama.OffsetOldest, 0).
-			SetOffset(topicName, 0, sarama.OffsetNewest, 2),
-		"FetchRequest": sarama.NewMockFetchResponse(t, 1).
-			SetMessage(topicName, 0, 0, sarama.ByteEncoder([]byte{0x41, 0x42})).
-			SetMessage(topicName, 0, 1, sarama.ByteEncoder([]byte{0x41, 0x43})).
-			SetMessage(topicName, 0, 2, sarama.ByteEncoder([]byte{0x41, 0x44})),
-	})
+	startKafkaTopicConsumers(consumerTopicNameBlocks)
+	startKafkaTopicConsumers(consumerTopicNameTransactions)
+	startKafkaTopicConsumers(consumerTopicNameLogs)
+}
 
-	mockBroker.SetNotifier(func(bytes_read int, bytes_written int) {
-		log.Debug("MOCK NOTIFIER: bytes_read=", bytes_read, " bytes_written=", bytes_written)
-	})
+func startKafkaTopicConsumers(topicName string) {
+	kafkaBroker := config.Config.KafkaBrokerURL
+	consumerGroupHead := config.Config.ConsumerGroupHead
+	consumerGroupTail := config.Config.ConsumerGroupTail
 
-	// Set config
-	os.Setenv("KAFKA_BROKER_URL", mockBroker.Addr())
-	os.Setenv("CONSUMER_TOPICS", topicName)
-	os.Setenv("CONSUMER_GROUP", "test-consumer-group")
-	config.ReadEnvironment()
+	if KafkaTopicConsumers == nil {
+		KafkaTopicConsumers = make(map[string]*kafkaTopicConsumer)
+	}
 
-	StartWorkerConsumers()
+	KafkaTopicConsumers[topicName] = &kafkaTopicConsumer{
+		kafkaBroker,
+		topicName,
+		make(chan *sarama.ConsumerMessage),
+	}
 
-	// Wait for consumers
-	time.Sleep(5 * time.Second)
+	zap.S().Info("kafkaBroker=", kafkaBroker, " consumerTopics=", topicName, " consumerGroup=", consumerGroupHead, " - Starting Consumers")
+	go KafkaTopicConsumers[topicName].consumeGroup(consumerGroupHead, sarama.OffsetOldest)
+
+	zap.S().Info("kafkaBroker=", kafkaBroker, " consumerTopics=", topicName, " consumerGroup=", consumerGroupTail, " - Starting Consumers")
+	go KafkaTopicConsumers[topicName].consumeGroup(consumerGroupTail, sarama.OffsetOldest)
+}
+
+func (k *kafkaTopicConsumer) consumeGroup(group string, startOffset int64) {
+	version, err := sarama.ParseKafkaVersion("2.1.1")
+	if err != nil {
+		zap.S().Panic("CONSUME GROUP ERROR: parsing Kafka version: ", err.Error())
+	}
+
+	///////////////////////////
+	// Consumer Group Config //
+	///////////////////////////
+
+	saramaConfig := sarama.NewConfig()
+
+	// Version
+	saramaConfig.Version = version
+
+	// Balance Strategy
+	switch config.Config.ConsumerGroupBalanceStrategy {
+	case "BalanceStrategyRange":
+		saramaConfig.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
+	case "BalanceStrategySticky":
+		saramaConfig.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategySticky
+	case "BalanceStrategyRoundRobin":
+		saramaConfig.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRoundRobin
+	default:
+		saramaConfig.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
+	}
+
+	// Start offset
+	if startOffset != 0 {
+		saramaConfig.Consumer.Offsets.Initial = startOffset
+	} else {
+		saramaConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
+	}
+
+	var consumerGroup sarama.ConsumerGroup
+	for {
+		consumerGroup, err = sarama.NewConsumerGroup([]string{k.brokerURL}, group, saramaConfig)
+		if err != nil {
+			zap.S().Warn("Creating consumer group consumerGroup err: ", err.Error())
+			zap.S().Info("Retrying in 3 seconds...")
+			time.Sleep(3 * time.Second)
+			continue
+		}
+		break
+	}
+
+	// From example: /sarama/blob/master/examples/consumergroup/main.go
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		claimConsumer := &ClaimConsumer{
+			startOffset: startOffset,
+			topicName:   k.topicName,
+			topicChan:   k.TopicChannel,
+			group:       group,
+		}
+
+		for {
+			// `Consume` should be called inside an infinite loop, when a
+			// server-side rebalance happens, the consumer session will need to be
+			// recreated to get the new claims
+			err := consumerGroup.Consume(ctx, []string{k.topicName}, claimConsumer)
+			if err != nil {
+				zap.S().Warn("CONSUME GROUP ERROR: from consumer: ", err.Error())
+			}
+			// check if context was cancelled, signaling that the consumer should stop
+			if ctx.Err() != nil {
+				zap.S().Warn("CONSUME GROUP WARN: from context: ", ctx.Err().Error())
+				return
+			}
+		}
+	}()
+
+	// Waiting, so that consumerGroup remains alive
+	ch := make(chan int, 1)
+	<-ch
+	cancel()
+}
+
+type ClaimConsumer struct {
+	startOffset int64
+	topicName   string
+	topicChan   chan *sarama.ConsumerMessage
+	group       string
+}
+
+func (c *ClaimConsumer) Setup(sess sarama.ConsumerGroupSession) error {
+
+	/*
+		// Reset offsets
+		if c.startOffset == 0 {
+			partitions := sess.Claims()[c.topicName]
+
+			for _, p := range partitions {
+				sess.ResetOffset(c.topicName, p, 0, "reset")
+			}
+		}
+	*/
+
+	return nil
+}
+func (*ClaimConsumer) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
+func (c *ClaimConsumer) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+
+	for {
+		var topicMsg *sarama.ConsumerMessage
+		select {
+		case msg := <-claim.Messages():
+			if msg == nil {
+				zap.S().Warn("GROUP=", c.group, ",TOPIC=", c.topicName, " - Kafka message is nil, exiting ConsumeClaim loop...")
+				return nil
+			}
+			topicMsg = msg
+		case <-time.After(5 * time.Second):
+			zap.S().Info("GROUP=", c.group, ",TOPIC=", c.topicName, " - No new kafka messages, waited 5 secs...")
+			continue
+		}
+
+		zap.S().Info("GROUP=", c.group, ",TOPIC=", c.topicName, ",PARTITION=", topicMsg.Partition, ",OFFSET=", topicMsg.Offset, " - New message")
+		sess.MarkMessage(topicMsg, "")
+
+		// Broadcast
+		c.topicChan <- topicMsg
+	}
+	return nil
 }

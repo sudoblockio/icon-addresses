@@ -32,7 +32,8 @@ func StartWorkerConsumers() {
 
 func startKafkaTopicConsumers(topicName string) {
 	kafkaBroker := config.Config.KafkaBrokerURL
-	consumerGroup := config.Config.ConsumerGroup
+	consumerGroupHead := config.Config.ConsumerGroupHead
+	consumerGroupTail := config.Config.ConsumerGroupTail
 
 	if KafkaTopicConsumers == nil {
 		KafkaTopicConsumers = make(map[string]*kafkaTopicConsumer)
@@ -44,13 +45,11 @@ func startKafkaTopicConsumers(topicName string) {
 		make(chan *sarama.ConsumerMessage),
 	}
 
-	zap.S().Info("kafkaBroker=", kafkaBroker, " consumerTopics=", topicName, " consumerGroup=", consumerGroup, " - Starting Consumers")
+	zap.S().Info("kafkaBroker=", kafkaBroker, " consumerTopics=", topicName, " consumerGroup=", consumerGroupHead, " - Starting Consumers")
+	go KafkaTopicConsumers[topicName].consumeGroup(consumerGroupHead, sarama.OffsetOldest)
 
-	// Start from last read message
-	go KafkaTopicConsumers[topicName].consumeGroup(consumerGroup+"-HEAD", sarama.OffsetOldest)
-
-	// Start from 0 always
-	go KafkaTopicConsumers[topicName].consumeGroup(consumerGroup+"-TAIL", 0)
+	zap.S().Info("kafkaBroker=", kafkaBroker, " consumerTopics=", topicName, " consumerGroup=", consumerGroupTail, " - Starting Consumers")
+	go KafkaTopicConsumers[topicName].consumeGroup(consumerGroupTail, sarama.OffsetOldest)
 }
 
 func (k *kafkaTopicConsumer) consumeGroup(group string, startOffset int64) {
@@ -88,7 +87,6 @@ func (k *kafkaTopicConsumer) consumeGroup(group string, startOffset int64) {
 	}
 
 	var consumerGroup sarama.ConsumerGroup
-	ctx, cancel := context.WithCancel(context.Background())
 	for {
 		consumerGroup, err = sarama.NewConsumerGroup([]string{k.brokerURL}, group, saramaConfig)
 		if err != nil {
@@ -101,6 +99,7 @@ func (k *kafkaTopicConsumer) consumeGroup(group string, startOffset int64) {
 	}
 
 	// From example: /sarama/blob/master/examples/consumergroup/main.go
+	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
 		claimConsumer := &ClaimConsumer{
 			startOffset: startOffset,
@@ -140,14 +139,16 @@ type ClaimConsumer struct {
 
 func (c *ClaimConsumer) Setup(sess sarama.ConsumerGroupSession) error {
 
-	// Reset offsets
-	if c.startOffset == 0 {
-		partitions := sess.Claims()[c.topicName]
+	/*
+		// Reset offsets
+		if c.startOffset == 0 {
+			partitions := sess.Claims()[c.topicName]
 
-		for _, p := range partitions {
-			sess.ResetOffset(c.topicName, p, 0, "reset")
+			for _, p := range partitions {
+				sess.ResetOffset(c.topicName, p, 0, "reset")
+			}
 		}
-	}
+	*/
 
 	return nil
 }
@@ -158,6 +159,10 @@ func (c *ClaimConsumer) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sar
 		var topicMsg *sarama.ConsumerMessage
 		select {
 		case msg := <-claim.Messages():
+			if msg == nil {
+				zap.S().Warn("GROUP=", c.group, ",TOPIC=", c.topicName, " - Kafka message is nil, exiting ConsumeClaim loop...")
+				return nil
+			}
 			topicMsg = msg
 		case <-time.After(5 * time.Second):
 			zap.S().Info("GROUP=", c.group, ",TOPIC=", c.topicName, " - No new kafka messages, waited 5 secs...")
