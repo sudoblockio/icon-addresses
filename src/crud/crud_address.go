@@ -162,6 +162,7 @@ func StartAddressLoader() {
 			/////////////////
 			transactionCount := uint64(0)
 			logCount := uint64(0)
+			balance := float64(0)
 
 			//////////////////////////////////
 			// Transaction Count By Address //
@@ -191,8 +192,24 @@ func StartAddressLoader() {
 			}
 			logCount = count
 
+			//////////////
+			// Balances //
+			//////////////
+
+			// current balance
+			currentBalance, err := GetBalanceModel().SelectLatest(newAddress.PublicKey)
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				balance = 0
+			} else if err != nil {
+				// Postgres error
+				zap.S().Fatal(err.Error())
+			} else {
+				balance = currentBalance.ValueDecimal
+			}
+
 			newAddress.TransactionCount = transactionCount
 			newAddress.LogCount = logCount
+			newAddress.Balance = balance
 
 			//////////////////////
 			// Load to postgres //
@@ -204,7 +221,6 @@ func StartAddressLoader() {
 				zap.S().Info("Loader=Address, Address=", newAddress.PublicKey, " - FATAL")
 				zap.S().Fatal(err.Error())
 			}
-
 		}
 	}()
 }

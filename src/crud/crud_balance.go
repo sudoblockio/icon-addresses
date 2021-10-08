@@ -54,6 +54,23 @@ func (m *BalanceModel) Migrate() error {
 	return err
 }
 
+func (m *BalanceModel) SelectLatest(
+	publicKey string,
+) (*models.Balance, error) {
+	db := m.db
+
+	// Order by block number
+	db = db.Order("block_number DESC")
+
+	// publicKey
+	db = db.Where("public_key = ?", publicKey)
+
+	balance := &models.Balance{}
+	db = db.First(balance)
+
+	return balance, db.Error
+}
+
 func (m *BalanceModel) SelectOneByBlockNumber(
 	publicKey string,
 	blockNumber uint64,
@@ -131,6 +148,13 @@ func StartBalanceLoader() {
 					"PublicKey=", newBalance.PublicKey,
 					" - FATAL",
 				)
+				zap.S().Fatal(err.Error())
+			}
+
+			// Force addresses enrichment
+			err = reloadAddress(newBalance.PublicKey)
+			if err != nil {
+				// Postgres error
 				zap.S().Fatal(err.Error())
 			}
 		}

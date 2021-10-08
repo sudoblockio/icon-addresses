@@ -11,4 +11,5 @@ message Address {
   bool is_contract = 2 [(gorm.field).tag = {index: "address_idx_is_contract"}];
   uint64 transaction_count = 3 [(gorm.field).tag = {index: "address_idx_transaction_count"}];
   uint64 log_count = 4 [(gorm.field).tag = {index: "address_idx_log_count"}];
+  double balance = 5 [(gorm.field).tag = {index: "address_idx_balance"}];
 }

@@ -175,7 +175,7 @@ func DefaultListTransactionCountByAddress(ctx context.Context, db *gorm1.DB) ([]
 		}
 	}
 	db = db.Where(&ormObj)
-	db = db.Order("public_key")
+	db = db.Order("transaction_hash")
 	ormResponse := []TransactionCountByAddressORM{}
 	if err := db.Find(&ormResponse).Error; err != nil {
 		return nil, err

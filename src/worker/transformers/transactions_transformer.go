@@ -139,6 +139,7 @@ func transformTransactionRawToAddress(txRaw *models.TransactionRaw, useFromAddre
 		IsContract:       isContract,
 		TransactionCount: 0, // Enriched in loader
 		LogCount:         0, // Enriched in loader
+		Balance:          0, // Enriched in loader
 	}
 }
 

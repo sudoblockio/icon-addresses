@@ -23,9 +23,6 @@ func startBalanceBuilder() {
 
 	currentBlockNumber := uint64(0)
 
-	// cache balances
-	addressValuesCache := map[string]string{}
-
 	// Hardcode genesis transaction in block#0
 	// hx54f7853dc6481b670caf69c5a27c7c8fe5be8269
 	if currentBlockNumber == 0 {
@@ -135,10 +132,17 @@ func startBalanceBuilder() {
 				newFee := transaction.TransactionFee
 
 				// Get current balance of public key
-				curValue, isCached := addressValuesCache[key]
-				if isCached == false {
-					// No entry yet
+				curBalance, err := crud.GetBalanceModel().SelectOneByBlockNumber(
+					key,
+					transaction.BlockNumber-1,
+				)
+				if errors.Is(err, gorm.ErrRecordNotFound) {
 					curValue = "0x0"
+				} else if err != nil {
+					// Postgres error
+					zap.S().Fatal(err.Error())
+				} else {
+					curValue = curBalance.Value
 				}
 
 				// Hex -> big.Int
@@ -181,11 +185,35 @@ func startBalanceBuilder() {
 					Timestamp:        transaction.BlockTimestamp,
 				}
 
-				// Load to cache
-				addressValuesCache[key] = newValue
-				if newValue == "0x0" {
-					// empty address, remove from cache
-					delete(addressValuesCache, key)
+				// Wait until state is set
+				for {
+					latestBalance, err := crud.GetBalanceModel().SelectOneByBlockNumber(
+						key,
+						transaction.BlockNumber,
+					)
+					if errors.Is(err, gorm.ErrRecordNotFound) {
+						// No record yet
+						zap.S().Info(
+							"Builder=BalanceBuilder,",
+							"BlockNumber=", currentBlockNumber,
+							" - Balance not set yet...",
+						)
+						time.Sleep(1 * time.Millisecond)
+						continue
+					} else if err != nil {
+						// Postgres error
+						zap.S().Fatal(err.Error())
+					} else if latestBalance.Value != newValue {
+						zap.S().Info(
+							"Builder=BalanceBuilder,",
+							"BlockNumber=", currentBlockNumber,
+							" - Balance not set yet...",
+						)
+						time.Sleep(1 * time.Millisecond)
+						continue
+					}
+					// Successful
+					break
 				}
 			}
 		}
@@ -199,6 +227,5 @@ func startBalanceBuilder() {
 			" - Reading next block...",
 		)
 		currentBlockNumber++
-		// time.Sleep(1 * time.Millisecond)
 	}
 }
