@@ -59,8 +59,8 @@ func (m *BalanceModel) SelectLatest(
 ) (*models.Balance, error) {
 	db := m.db
 
-	// Order by block number
-	db = db.Order("block_number DESC")
+	// Order by block number, transaction_index, log_index
+	db = db.Order("block_number DESC, transaction_index DESC, log_index DESC")
 
 	// publicKey
 	db = db.Where("public_key = ?", publicKey)
@@ -77,8 +77,8 @@ func (m *BalanceModel) SelectOneByBlockNumber(
 ) (*models.Balance, error) {
 	db := m.db
 
-	// Order by block number
-	db = db.Order("block_number DESC")
+	// Order by block number, transaction_index, log_index
+	db = db.Order("block_number DESC, transaction_index DESC, log_index DESC")
 
 	// publicKey
 	db = db.Where("public_key = ?", publicKey)
@@ -90,6 +90,49 @@ func (m *BalanceModel) SelectOneByBlockNumber(
 	db = db.First(balance)
 
 	return balance, db.Error
+}
+
+func (m *BalanceModel) SelectOneByBlockNumberTransactionIndexLogIndex(
+	publicKey string,
+	blockNumber uint64,
+	transactionIndex uint32,
+	logIndex int32,
+) (*models.Balance, error) {
+	db := m.db
+
+	// Order by block number, transaction_index, log_index
+	db = db.Order("block_number DESC")
+
+	// publicKey
+	db = db.Where("public_key = ?", publicKey)
+
+	// Block number
+	db = db.Where("block_number <= ?", blockNumber)
+
+	// Transaction index
+	db = db.Where("transaction_index = ?", transactionIndex)
+
+	// Log index
+	db = db.Where("log_index = ?", logIndex)
+
+	balance := &models.Balance{}
+	db = db.First(balance)
+
+	return balance, db.Error
+}
+
+func (m *BalanceModel) SelectLatestBlockNumber() (uint64, error) {
+	db := m.db
+
+	// Set table
+	db = db.Model(&models.Balance{})
+
+	// Get max block number
+	blockNumber := uint64(0)
+	row := db.Select("max(block_number)").Row()
+	row.Scan(&blockNumber)
+
+	return blockNumber, db.Error
 }
 
 func (m *BalanceModel) UpsertOne(

@@ -16,12 +16,34 @@ import (
 // Table builder for balances
 func StartBalanceBuilder() {
 
-	go startBalanceBuilder()
+	// Tail
+	go startBalanceBuilder(0)
+
+	// Head
+	headBlockNumber, err := crud.GetBalanceModel().SelectLatestBlockNumber()
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		// No entries yet
+		// No need for head builder
+		return
+	} else if err != nil {
+		// Postgres error
+		zap.S().Fatal(err.Error())
+	} else if headBlockNumber <= 10000 {
+		return
+	}
+
+	go startBalanceBuilder(headBlockNumber)
 }
 
-func startBalanceBuilder() {
+func startBalanceBuilder(startBlockNumber uint64) {
 
-	currentBlockNumber := uint64(0)
+	zap.S().Info(
+		"Builder=BalanceBuilder,",
+		"BlockNumber=", startBlockNumber,
+		" - Starting builder",
+	)
+
+	currentBlockNumber := startBlockNumber
 
 	// Hardcode genesis transaction in block#0
 	// hx54f7853dc6481b670caf69c5a27c7c8fe5be8269
@@ -187,16 +209,18 @@ func startBalanceBuilder() {
 
 				// Wait until state is set
 				for {
-					latestBalance, err := crud.GetBalanceModel().SelectOneByBlockNumber(
+					latestBalance, err := crud.GetBalanceModel().SelectOneByBlockNumberTransactionIndexLogIndex(
 						key,
 						transaction.BlockNumber,
+						transaction.TransactionIndex,
+						transaction.LogIndex,
 					)
 					if errors.Is(err, gorm.ErrRecordNotFound) {
 						// No record yet
 						zap.S().Info(
 							"Builder=BalanceBuilder,",
 							"BlockNumber=", currentBlockNumber,
-							" - Balance not set yet...",
+							" - Balance not set yet...No record",
 						)
 						time.Sleep(1 * time.Millisecond)
 						continue
@@ -207,6 +231,9 @@ func startBalanceBuilder() {
 						zap.S().Info(
 							"Builder=BalanceBuilder,",
 							"BlockNumber=", currentBlockNumber,
+							",PublicKey=", key,
+							",curValue=", latestBalance.Value,
+							",newValue=", newValue,
 							" - Balance not set yet...",
 						)
 						time.Sleep(1 * time.Millisecond)
