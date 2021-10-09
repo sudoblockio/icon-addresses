@@ -1,0 +1,15 @@
+syntax = "proto3";
+package models;
+option go_package = "./models";
+
+
+message ContractAPIList {
+
+  string public_key = 1;
+  uint64 transaction_count = 2;
+  uint64 log_count = 3;
+  double balance = 4;
+  string name = 5;
+  string status = 6;
+  uint64 created_timestamp = 7;
+}

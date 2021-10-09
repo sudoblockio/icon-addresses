@@ -182,7 +182,7 @@ func DefaultListLogCountByAddress(ctx context.Context, db *gorm1.DB) ([]*LogCoun
 		}
 	}
 	db = db.Where(&ormObj)
-	db = db.Order("log_index")
+	db = db.Order("transaction_hash")
 	ormResponse := []LogCountByAddressORM{}
 	if err := db.Find(&ormResponse).Error; err != nil {
 		return nil, err

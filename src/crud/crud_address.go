@@ -160,6 +160,36 @@ func (m *AddressModel) SelectManyAPI(
 	return addresses, db.Error
 }
 
+// SelectManyContractsAPI - select many from addreses table
+func (m *AddressModel) SelectManyContractsAPI(
+	limit int,
+	skip int,
+) (*[]models.ContractAPIList, error) {
+	db := m.db
+
+	// Set table
+	db = db.Model(&models.Address{})
+
+	// Order balances
+	db = db.Order("balance DESC")
+
+	// Is contract
+	db = db.Where("is_contract = ?", true)
+
+	// Limit
+	db = db.Limit(limit)
+
+	// Skip
+	if skip != 0 {
+		db = db.Offset(skip)
+	}
+
+	contracts := &[]models.ContractAPIList{}
+	db = db.Find(contracts)
+
+	return contracts, db.Error
+}
+
 func (m *AddressModel) UpsertOne(
 	address *models.Address,
 ) error {
