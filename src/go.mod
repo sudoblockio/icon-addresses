@@ -8,7 +8,6 @@ require (
 	github.com/arsmn/fiber-swagger/v2 v2.13.0
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/cenkalti/backoff/v4 v4.1.1
-	github.com/eapache/go-resiliency v1.2.0 // indirect
 	github.com/frankban/quicktest v1.13.0 // indirect
 	github.com/go-redis/redis/v8 v8.11.3
 	github.com/gofiber/fiber/v2 v2.14.0
@@ -19,7 +18,6 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/prometheus/client_golang v1.11.0
-	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0
 	go.uber.org/zap v1.18.1
