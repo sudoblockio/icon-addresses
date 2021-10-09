@@ -77,13 +77,13 @@ func transactionsTransformer() {
 		}
 
 		// Loads to contract_count (from address)
-		if fromAddress.IsContract == true {
+		if fromAddress != nil && fromAddress.IsContract == true {
 			fromContract := transformAddressToContractCount(fromAddress)
 			contractCountLoaderChan <- fromContract
 		}
 
 		// Loads to contract_count (to address)
-		if toAddress.IsContract == true {
+		if toAddress != nil && toAddress.IsContract == true {
 			toContract := transformAddressToContractCount(toAddress)
 			contractCountLoaderChan <- toContract
 		}
