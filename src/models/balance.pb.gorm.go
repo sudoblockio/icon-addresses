@@ -203,7 +203,7 @@ func DefaultListBalance(ctx context.Context, db *gorm1.DB) ([]*Balance, error) {
 		}
 	}
 	db = db.Where(&ormObj)
-	db = db.Order("block_number")
+	db = db.Order("public_key")
 	ormResponse := []BalanceORM{}
 	if err := db.Find(&ormResponse).Error; err != nil {
 		return nil, err
