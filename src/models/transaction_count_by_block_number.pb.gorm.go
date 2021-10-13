@@ -22,7 +22,7 @@ var _ = math.Inf
 
 type TransactionCountByBlockNumberORM struct {
 	BlockNumber     uint64 `gorm:"index:transaction_count_by_block_count_idx_block_count"`
-	Count           uint32
+	Count           uint32 `gorm:"index:transaction_count_by_block_number_idx_count"`
 	TransactionHash string `gorm:"primary_key"`
 }
 

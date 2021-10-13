@@ -10,6 +10,6 @@ message LogCountByBlockNumber {
   string transaction_hash = 1 [(gorm.field).tag = {primary_key: true}];
   uint64 log_index = 2 [(gorm.field).tag = {primary_key: true}];
   uint64 block_number = 3 [(gorm.field).tag = {index: "log_count_by_block_count_idx_block_count"}];
-  uint32 count = 4;
+  uint32 count = 4 [(gorm.field).tag = {index: "log_count_by_block_count_idx_count"}];
   uint32 max_count_by_transaction = 5;
 }

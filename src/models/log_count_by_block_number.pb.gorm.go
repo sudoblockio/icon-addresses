@@ -22,7 +22,7 @@ var _ = math.Inf
 
 type LogCountByBlockNumberORM struct {
 	BlockNumber           uint64 `gorm:"index:log_count_by_block_count_idx_block_count"`
-	Count                 uint32
+	Count                 uint32 `gorm:"index:log_count_by_block_count_idx_count"`
 	LogIndex              uint64 `gorm:"primary_key"`
 	MaxCountByTransaction uint32
 	TransactionHash       string `gorm:"primary_key"`
@@ -189,7 +189,7 @@ func DefaultListLogCountByBlockNumber(ctx context.Context, db *gorm1.DB) ([]*Log
 		}
 	}
 	db = db.Where(&ormObj)
-	db = db.Order("transaction_hash")
+	db = db.Order("log_index")
 	ormResponse := []LogCountByBlockNumberORM{}
 	if err := db.Find(&ormResponse).Error; err != nil {
 		return nil, err
