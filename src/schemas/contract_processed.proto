@@ -1,0 +1,16 @@
+syntax = "proto3";
+package models;
+option go_package = "./models";
+
+import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
+
+// Used for proto and gorm
+message ContractProcessed {
+  option (gorm.opts) = {ormable: true};
+
+  string address = 1 [(gorm.field).tag = {primary_key: true}];
+  string name = 2;
+  int64 created_timestamp = 3 [(gorm.field).tag = {index: "contract_processed_idx_created_timestamp"}];
+  string status = 4;
+  bool is_token = 5 [(gorm.field).tag = {index: "contract_processed_idx_is_token"}];
+}

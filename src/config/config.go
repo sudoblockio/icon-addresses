@@ -45,22 +45,25 @@ type configType struct {
 	KafkaGroupID      string `envconfig:"KAFKA_GROUP_ID" required:"false" default:"addresses-service"`
 
 	// Topics
-	ConsumerGroupHead            string `envconfig:"CONSUMER_GROUP_HEAD" required:"false" default:"addresses-consumer-group-head"`
-	ConsumerGroupTail            string `envconfig:"CONSUMER_GROUP_TAIL" required:"false" default:"addresses-consumer-group-tail"`
-	ConsumerGroupBalanceStrategy string `envconfig:"CONSUMER_GROUP_BALANCE_STRATEGY" required:"false" default:"BalanceStrategySticky"`
-	ConsumerTopicBlocks          string `envconfig:"CONSUMER_TOPIC_BLOCKS" required:"false" default:"blocks"`
-	ConsumerTopicTransactions    string `envconfig:"CONSUMER_TOPIC_TRANSACTIONS" required:"false" default:"transactions"`
-	ConsumerTopicLogs            string `envconfig:"CONSUMER_TOPIC_LOGS" required:"false" default:"logs"`
+	ConsumerGroupHead               string `envconfig:"CONSUMER_GROUP_HEAD" required:"false" default:"addresses-consumer-group-head"`
+	ConsumerGroupTail               string `envconfig:"CONSUMER_GROUP_TAIL" required:"false" default:"addresses-consumer-group-tail"`
+	ConsumerGroupBalanceStrategy    string `envconfig:"CONSUMER_GROUP_BALANCE_STRATEGY" required:"false" default:"BalanceStrategySticky"`
+	ConsumerTopicBlocks             string `envconfig:"CONSUMER_TOPIC_BLOCKS" required:"false" default:"blocks"`
+	ConsumerTopicTransactions       string `envconfig:"CONSUMER_TOPIC_TRANSACTIONS" required:"false" default:"transactions"`
+	ConsumerTopicLogs               string `envconfig:"CONSUMER_TOPIC_LOGS" required:"false" default:"logs"`
+	ConsumerTopicContractsProcessed string `envconfig:"CONSUMER_TOPIC_CONTRACT_PROCESSED" required:"false" default:"contracts-processed"`
 
 	// DB
-	DbDriver   string `envconfig:"DB_DRIVER" required:"false" default:"postgres"`
-	DbHost     string `envconfig:"DB_HOST" required:"false" default:"localhost"`
-	DbPort     string `envconfig:"DB_PORT" required:"false" default:"5432"`
-	DbUser     string `envconfig:"DB_USER" required:"false" default:"postgres"`
-	DbPassword string `envconfig:"DB_PASSWORD" required:"false" default:"changeme"`
-	DbName     string `envconfig:"DB_DBNAME" required:"false" default:"postgres"`
-	DbSslmode  string `envconfig:"DB_SSL_MODE" required:"false" default:"disable"`
-	DbTimezone string `envconfig:"DB_TIMEZONE" required:"false" default:"UTC"`
+	DbDriver             string `envconfig:"DB_DRIVER" required:"false" default:"postgres"`
+	DbHost               string `envconfig:"DB_HOST" required:"false" default:"localhost"`
+	DbPort               string `envconfig:"DB_PORT" required:"false" default:"5432"`
+	DbUser               string `envconfig:"DB_USER" required:"false" default:"postgres"`
+	DbPassword           string `envconfig:"DB_PASSWORD" required:"false" default:"changeme"`
+	DbName               string `envconfig:"DB_DBNAME" required:"false" default:"postgres"`
+	DbSslmode            string `envconfig:"DB_SSL_MODE" required:"false" default:"disable"`
+	DbTimezone           string `envconfig:"DB_TIMEZONE" required:"false" default:"UTC"`
+	DbMaxIdleConnections int    `envconfig:"DB_MAX_IDLE_CONNECTIONS" required:"false" default:"2"`
+	DbMaxOpenConnections int    `envconfig:"DB_MAX_OPEN_CONNECTIONS" required:"false" default:"10"`
 
 	// Redis
 	RedisHost                     string `envconfig:"REDIS_HOST" required:"false" default:"localhost"`

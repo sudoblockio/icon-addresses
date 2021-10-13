@@ -16,6 +16,7 @@ type kafkaTopicConsumer struct {
 	TopicChannel chan *sarama.ConsumerMessage
 }
 
+// Topic name -> kafka topic consumer
 var KafkaTopicConsumers map[string]*kafkaTopicConsumer
 
 // StartWorkerConsumers - start consumer goroutines for Worker config
@@ -24,10 +25,12 @@ func StartWorkerConsumers() {
 	consumerTopicNameBlocks := config.Config.ConsumerTopicBlocks
 	consumerTopicNameTransactions := config.Config.ConsumerTopicTransactions
 	consumerTopicNameLogs := config.Config.ConsumerTopicLogs
+	consumerTopicNameContractsProcessed := config.Config.ConsumerTopicContractsProcessed
 
 	startKafkaTopicConsumers(consumerTopicNameBlocks)
 	startKafkaTopicConsumers(consumerTopicNameTransactions)
 	startKafkaTopicConsumers(consumerTopicNameLogs)
+	startKafkaTopicConsumers(consumerTopicNameContractsProcessed)
 }
 
 func startKafkaTopicConsumers(topicName string) {
