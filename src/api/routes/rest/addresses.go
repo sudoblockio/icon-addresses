@@ -12,9 +12,10 @@ import (
 )
 
 type AddressesQuery struct {
-	Limit      int  `query:"limit"`
-	Skip       int  `query:"skip"`
-	IsContract bool `query:"is_contract"`
+	Limit      int    `query:"limit"`
+	Skip       int    `query:"skip"`
+	IsContract bool   `query:"is_contract"`
+	PublicKey  string `query:"public_key"`
 }
 
 func AddressesAddHandlers(app *fiber.App) {
@@ -36,6 +37,7 @@ func AddressesAddHandlers(app *fiber.App) {
 // @Param limit query int false "amount of records"
 // @Param skip query int false "skip to a record"
 // @Param is_contract query bool false "contract addresses only"
+// @Param public_key query string false "find by public key"
 // @Router /api/v1/addresses [get]
 // @Success 200 {object} []models.AddressAPIList
 // @Failure 422 {object} map[string]interface{}
@@ -64,6 +66,7 @@ func handlerGetAddresses(c *fiber.Ctx) error {
 		params.Limit,
 		params.Skip,
 		params.IsContract,
+		params.PublicKey,
 	)
 	if err != nil {
 		zap.S().Warnf("Addresses CRUD ERROR: %s", err.Error())
