@@ -23,6 +23,7 @@ func AddressesAddHandlers(app *fiber.App) {
 	prefix := config.Config.RestPrefix + "/addresses"
 
 	app.Get(prefix+"/", handlerGetAddresses)
+	app.Get(prefix+"/details/:public_key", handlerGetAddresses)
 	app.Get(prefix+"/contracts", handlerGetContracts)
 	app.Get(prefix+"/address-tokens/:public_key", handlerGetAddressTokens)
 }
@@ -89,6 +90,47 @@ func handlerGetAddresses(c *fiber.Ctx) error {
 	c.Append("X-TOTAL-COUNT", strconv.FormatUint(counter, 10))
 
 	body, _ := json.Marshal(addresses)
+	return c.SendString(string(body))
+}
+
+// Address Details
+// @Summary Get Address Details
+// @Description get details of an address
+// @Tags Addresses
+// @BasePath /api/v1
+// @Accept */*
+// @Produce json
+// @Param public_key path string true "find by public key"
+// @Router /api/v1/addresses/details/{public_key} [get]
+// @Success 200 {object} models.Address
+// @Failure 422 {object} map[string]interface{}
+func handlerGetAddresses(c *fiber.Ctx) error {
+	publicKey := c.Params("public_key")
+	if publicKey == "" {
+		c.Status(422)
+		return c.SendString(`{"error": "public required"}`)
+	}
+
+	params := new(AddressesQuery)
+	if err := c.QueryParser(params); err != nil {
+		zap.S().Warnf("Addresses Get Handler ERROR: %s", err.Error())
+
+		c.Status(422)
+		return c.SendString(`{"error": "could not parse query parameters"}`)
+	}
+
+	// Get Addresses
+	address, err := crud.GetAddressModel().SelectOne(
+		publicKey,
+	)
+	if err != nil {
+		c.Status(500)
+
+		zap.S().Warnf("Addresses CRUD ERROR: %s", err.Error())
+		return c.SendString(`{"error": "could not retrieve addresses"}`)
+	}
+
+	body, _ := json.Marshal(address)
 	return c.SendString(string(body))
 }
 
