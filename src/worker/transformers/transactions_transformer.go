@@ -200,12 +200,12 @@ func transformTransactionRawToTransaction(txRaw *models.TransactionRaw) *models.
 	}
 }
 
-func transformTransactionRawToTransactionCountByAddress(txRaw *models.TransactionRaw, useFromAddress bool) *models.TransactionCountByAddress {
+func transformTransactionRawToTransactionCountByAddress(txRaw *models.TransactionRaw, isFromAddress bool) *models.TransactionCountByAddress {
 
 	// Public Key
 	publicKey := ""
 
-	if useFromAddress == true {
+	if isFromAddress == true {
 		publicKey = txRaw.FromAddress
 	} else {
 		publicKey = txRaw.ToAddress
@@ -220,6 +220,7 @@ func transformTransactionRawToTransactionCountByAddress(txRaw *models.Transactio
 		Count:           0, // Adds in loader
 	}
 }
+
 func transformTransactionRawTransactionCountByBlockNumber(txRaw *models.TransactionRaw) *models.TransactionCountByBlockNumber {
 
 	return &models.TransactionCountByBlockNumber{
