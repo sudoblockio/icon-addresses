@@ -23,7 +23,7 @@ func AddressesAddHandlers(app *fiber.App) {
 	prefix := config.Config.RestPrefix + "/addresses"
 
 	app.Get(prefix+"/", handlerGetAddresses)
-	app.Get(prefix+"/details/:public_key", handlerGetAddresses)
+	app.Get(prefix+"/details/:public_key", handlerGetAddressDetails)
 	app.Get(prefix+"/contracts", handlerGetContracts)
 	app.Get(prefix+"/address-tokens/:public_key", handlerGetAddressTokens)
 }
@@ -104,7 +104,7 @@ func handlerGetAddresses(c *fiber.Ctx) error {
 // @Router /api/v1/addresses/details/{public_key} [get]
 // @Success 200 {object} models.Address
 // @Failure 422 {object} map[string]interface{}
-func handlerGetAddresses(c *fiber.Ctx) error {
+func handlerGetAddressDetails(c *fiber.Ctx) error {
 	publicKey := c.Params("public_key")
 	if publicKey == "" {
 		c.Status(422)
