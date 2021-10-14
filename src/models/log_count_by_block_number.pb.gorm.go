@@ -189,7 +189,7 @@ func DefaultListLogCountByBlockNumber(ctx context.Context, db *gorm1.DB) ([]*Log
 		}
 	}
 	db = db.Where(&ormObj)
-	db = db.Order("log_index")
+	db = db.Order("transaction_hash")
 	ormResponse := []LogCountByBlockNumberORM{}
 	if err := db.Find(&ormResponse).Error; err != nil {
 		return nil, err

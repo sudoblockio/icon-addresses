@@ -24,6 +24,7 @@ type AddressORM struct {
 	Balance          float64 `gorm:"index:address_idx_balance"`
 	CreatedTimestamp uint64  `gorm:"index:address_idx_created_timestamp"`
 	IsContract       bool    `gorm:"index:address_idx_is_contract"`
+	IsToken          bool    `gorm:"index:address_idx_is_token"`
 	LogCount         uint64  `gorm:"index:address_idx_log_count"`
 	Name             string
 	PublicKey        string `gorm:"primary_key"`
@@ -54,6 +55,7 @@ func (m *Address) ToORM(ctx context.Context) (AddressORM, error) {
 	to.Name = m.Name
 	to.Status = m.Status
 	to.CreatedTimestamp = m.CreatedTimestamp
+	to.IsToken = m.IsToken
 	if posthook, ok := interface{}(m).(AddressWithAfterToORM); ok {
 		err = posthook.AfterToORM(ctx, &to)
 	}
@@ -78,6 +80,7 @@ func (m *AddressORM) ToPB(ctx context.Context) (Address, error) {
 	to.Name = m.Name
 	to.Status = m.Status
 	to.CreatedTimestamp = m.CreatedTimestamp
+	to.IsToken = m.IsToken
 	if posthook, ok := interface{}(m).(AddressWithAfterToPB); ok {
 		err = posthook.AfterToPB(ctx, &to)
 	}
@@ -179,6 +182,10 @@ func DefaultApplyFieldMaskAddress(ctx context.Context, patchee *Address, patcher
 		}
 		if f == prefix+"CreatedTimestamp" {
 			patchee.CreatedTimestamp = patcher.CreatedTimestamp
+			continue
+		}
+		if f == prefix+"IsToken" {
+			patchee.IsToken = patcher.IsToken
 			continue
 		}
 	}

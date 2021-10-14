@@ -233,7 +233,7 @@ func StartAddressLoader() {
 			name := ""                    // Only contracts
 			createdTimestamp := uint64(0) // Only contracts
 			status := ""                  // Only contracts
-			isToken := ""                 // Only contracts
+			isToken := false              // Only contracts
 
 			//////////////////////////////////
 			// Transaction Count By Address //
@@ -287,7 +287,7 @@ func StartAddressLoader() {
 			///////////////
 
 			// current balance
-			contract, err := GetContractsModel().SelectOne(newAddress.PublicKey)
+			contract, err := GetContractModel().SelectOne(newAddress.PublicKey)
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				contract = &models.ContractProcessed{
 					Address:          newAddress.PublicKey,
@@ -301,7 +301,7 @@ func StartAddressLoader() {
 				zap.S().Fatal(err.Error())
 			}
 			name = contract.Name
-			createdTimestamp = contract.CreatedTimestamp
+			createdTimestamp = uint64(contract.CreatedTimestamp)
 			status = contract.Status
 			isToken = contract.IsToken
 

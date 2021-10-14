@@ -17,4 +17,5 @@ message Address {
   string name = 6;
   string status = 7;
   uint64 created_timestamp = 8 [(gorm.field).tag = {index: "address_idx_created_timestamp"}];
+  bool is_token = 9 [(gorm.field).tag = {index: "address_idx_is_token"}];
 }
