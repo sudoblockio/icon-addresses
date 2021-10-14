@@ -115,13 +115,16 @@ func StartTransactionCountByAddressLoader() {
 			)
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				// Last count
-				lastCount, err := GetTransactionCountByAddressModel().SelectLargestCountByPublicKey(
-					newTransactionCountByAddress.PublicKey,
-				)
-				if err != nil {
-					zap.S().Fatal(err.Error())
-				}
-				newTransactionCountByAddress.Count = lastCount + 1
+				/*
+					lastCount, err := GetTransactionCountByAddressModel().SelectLargestCountByPublicKey(
+						newTransactionCountByAddress.PublicKey,
+					)
+					if err != nil {
+						zap.S().Fatal(err.Error())
+					}
+					newTransactionCountByAddress.Count = lastCount + 1
+				*/
+				newTransactionCountByAddress.Count = 0
 
 				// Insert
 				err = GetTransactionCountByAddressModel().Insert(newTransactionCountByAddress)

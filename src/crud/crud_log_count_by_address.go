@@ -115,13 +115,16 @@ func StartLogCountByAddressLoader() {
 			)
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				// Last count
-				lastCount, err := GetLogCountByAddressModel().SelectLargestCountByPublicKey(
-					newLogCountByAddress.PublicKey,
-				)
-				if err != nil {
-					zap.S().Fatal(err.Error())
-				}
-				newLogCountByAddress.Count = lastCount + 1
+				/*
+					lastCount, err := GetLogCountByAddressModel().SelectLargestCountByPublicKey(
+						newLogCountByAddress.PublicKey,
+					)
+					if err != nil {
+						zap.S().Fatal(err.Error())
+					}
+					newLogCountByAddress.Count = lastCount + 1
+				*/
+				newLogCountByAddress.Count = 0
 
 				// Insert
 				err = GetLogCountByAddressModel().Insert(newLogCountByAddress)
