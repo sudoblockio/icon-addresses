@@ -99,7 +99,7 @@ worker:
     host: localhost
     port: 5432
     maxIdle: 0
-    maxOpen: 1
+    maxOpen: 2
   kafka:
     topics:
       blocks: blocks
