@@ -74,6 +74,9 @@ type configType struct {
 	RedisChannel                  string `envconfig:"REDIS_CHANNEL" required:"false" default:"addresses"`
 	RedisSentinelClientMode       bool   `envconfig:"REDIS_SENTINEL_CLIENT_MODE" required:"false" default:"false"`
 	RedisSentinelClientMasterName string `envconfig:"REDIS_SENTINEL_CLIENT_MASTER_NAME" required:"false" default:"master"`
+
+	// GORM
+	GormLoggingThresholdMilli int `envconfig:"GORM_LOGGING_THRESHOLD_MILLI" required:"false" default:"100"`
 }
 
 var Config configType
