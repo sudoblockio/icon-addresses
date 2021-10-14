@@ -85,6 +85,8 @@ func (m *LogCountByAddressModel) SelectOne(transactionHash string, logIndex uint
 }
 
 func (m *LogCountByAddressModel) SelectLargestCountByPublicKey(publicKey string) (uint64, error) {
+	//TODO
+	return 0, nil
 	db := m.db
 
 	// Set table
@@ -115,16 +117,13 @@ func StartLogCountByAddressLoader() {
 			)
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				// Last count
-				/*
-					lastCount, err := GetLogCountByAddressModel().SelectLargestCountByPublicKey(
-						newLogCountByAddress.PublicKey,
-					)
-					if err != nil {
-						zap.S().Fatal(err.Error())
-					}
-					newLogCountByAddress.Count = lastCount + 1
-				*/
-				newLogCountByAddress.Count = 0
+				lastCount, err := GetLogCountByAddressModel().SelectLargestCountByPublicKey(
+					newLogCountByAddress.PublicKey,
+				)
+				if err != nil {
+					zap.S().Fatal(err.Error())
+				}
+				newLogCountByAddress.Count = lastCount + 1
 
 				// Insert
 				err = GetLogCountByAddressModel().Insert(newLogCountByAddress)
