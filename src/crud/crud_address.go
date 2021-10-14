@@ -230,6 +230,10 @@ func StartAddressLoader() {
 			transactionCount := uint64(0)
 			logCount := uint64(0)
 			balance := float64(0)
+			name := ""                    // Only contracts
+			createdTimestamp := uint64(0) // Only contracts
+			status := ""                  // Only contracts
+			isToken := ""                 // Only contracts
 
 			//////////////////////////////////
 			// Transaction Count By Address //
@@ -239,7 +243,9 @@ func StartAddressLoader() {
 			count, err := GetTransactionCountByAddressModel().SelectLargestCountByPublicKey(
 				newAddress.PublicKey,
 			)
-			if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				count = 0
+			} else if err != nil {
 				// Postgres error
 				zap.S().Fatal(err.Error())
 			}
@@ -253,7 +259,9 @@ func StartAddressLoader() {
 			count, err = GetLogCountByAddressModel().SelectLargestCountByPublicKey(
 				newAddress.PublicKey,
 			)
-			if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				count = 0
+			} else if err != nil {
 				// Postgres error
 				zap.S().Fatal(err.Error())
 			}
@@ -274,9 +282,36 @@ func StartAddressLoader() {
 				balance = currentBalance.ValueDecimal
 			}
 
+			///////////////
+			// Contracts //
+			///////////////
+
+			// current balance
+			contract, err := GetContractsModel().SelectOne(newAddress.PublicKey)
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				contract = &models.ContractProcessed{
+					Address:          newAddress.PublicKey,
+					Name:             "",
+					CreatedTimestamp: 0,
+					Status:           "",
+					IsToken:          false,
+				}
+			} else if err != nil {
+				// Postgres error
+				zap.S().Fatal(err.Error())
+			}
+			name = contract.Name
+			createdTimestamp = contract.CreatedTimestamp
+			status = contract.Status
+			isToken = contract.IsToken
+
 			newAddress.TransactionCount = transactionCount
 			newAddress.LogCount = logCount
 			newAddress.Balance = balance
+			newAddress.Name = name
+			newAddress.CreatedTimestamp = createdTimestamp
+			newAddress.Status = status
+			newAddress.IsToken = isToken
 
 			//////////////////////
 			// Load to postgres //

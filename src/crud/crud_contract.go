@@ -54,6 +54,24 @@ func (m *ContractModel) Migrate() error {
 	return err
 }
 
+// SelectOne - select one from addresses table
+func (m *ContractModel) SelectOne(
+	address string,
+) (*models.ContractProcessed, error) {
+	db := m.db
+
+	// Set table
+	db = db.Model(&models.ContractProcessed{})
+
+	// Address
+	db = db.Where("address = ?", address)
+
+	contract := &models.ContractProcessed{}
+	db = db.First(contract)
+
+	return contract, db.Error
+}
+
 func (m *ContractModel) UpsertOne(
 	contract *models.ContractProcessed,
 ) error {
@@ -90,6 +108,13 @@ func StartContractLoader() {
 			if err != nil {
 				// Postgres error
 				zap.S().Info("Loader=Contract, Address=", newContract.Address, " - FATAL")
+				zap.S().Fatal(err.Error())
+			}
+
+			// Force addresses enrichment
+			err = reloadAddress(newContract.Address)
+			if err != nil {
+				// Postgres error
 				zap.S().Fatal(err.Error())
 			}
 		}
