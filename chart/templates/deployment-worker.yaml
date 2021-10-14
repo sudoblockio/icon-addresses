@@ -90,6 +90,10 @@ spec:
               value: {{ .Values.api.kafka.topics.logs }}
             - name: SCHEMA_NAME_TOPICS
               value: {{ .Values.kafka.schemaNameTopics }}
+            - name: DB_MAX_IDLE_CONNECTIONS
+              value: {{ .Values.db.maxIdle }}
+            - name: DB_MAX_OPEN_CONNECTIONS
+              value: {{ .Values.db.maxOpen }}
             - name: DB_DRIVER
               value: {{ .Values.db.driver }}
             - name: DB_HOST

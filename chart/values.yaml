@@ -26,6 +26,10 @@ api:
   annotations: null
   internal:
     port: 80
+    cors:
+      allowOrigins: ""
+      alllowHeaders: ""
+      exposeHeaders: ""
   health:
     port: 9300
     prefix: "/health"
@@ -113,7 +117,8 @@ kafka:
   kafkaBrokerURL: ""
   schemaRegistryURL: ""
   kafkaGroupID: websocket-group
-  consumerGroup: logs-consumer-group
+  consumerGroupHead:
+  consumerGroupTail:
   schemaNameTopics: "logs-ws:log"
 
 db:
@@ -121,6 +126,8 @@ db:
   name: blocks
   sslMode: disable
   timezone: UTC
+  maxIdle:
+  maxOpen:
 
 redis:
   host: "redis"
