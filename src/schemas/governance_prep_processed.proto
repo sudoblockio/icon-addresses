@@ -1,0 +1,13 @@
+syntax = "proto3";
+package models;
+option go_package = "./models";
+
+import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
+
+// Used for proto and gorm
+message GovernancePrepProcessed {
+  option (gorm.opts) = {ormable: true};
+
+  string address = 1 [(gorm.field).tag = {primary_key: true}];
+  bool is_prep = 2;
+}

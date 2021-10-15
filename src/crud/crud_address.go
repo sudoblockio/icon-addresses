@@ -234,6 +234,7 @@ func StartAddressLoader() {
 			createdTimestamp := uint64(0) // Only contracts
 			status := ""                  // Only contracts
 			isToken := false              // Only contracts
+			isGovernancePrep := false
 
 			//////////////////////////////////
 			// Transaction Count By Address //
@@ -286,7 +287,7 @@ func StartAddressLoader() {
 			// Contracts //
 			///////////////
 
-			// current balance
+			// Contract data
 			contract, err := GetContractModel().SelectOne(newAddress.PublicKey)
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				contract = &models.ContractProcessed{
@@ -305,6 +306,23 @@ func StartAddressLoader() {
 			status = contract.Status
 			isToken = contract.IsToken
 
+			//////////////////////
+			// Governance Preps //
+			//////////////////////
+
+			// Is Governance Prep
+			governancePrep, err := GetGovernancePrepProcessedModel().SelectOne(newAddress.PublicKey)
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				governancePrep = &models.GovernancePrepProcessed{
+					Address: newAddress.PublicKey,
+					IsPrep:  false,
+				}
+			} else if err != nil {
+				// Postgres error
+				zap.S().Fatal(err.Error())
+			}
+			isGovernancePrep = governancePrep.IsPrep
+
 			newAddress.TransactionCount = transactionCount
 			newAddress.LogCount = logCount
 			newAddress.Balance = balance
@@ -312,6 +330,7 @@ func StartAddressLoader() {
 			newAddress.CreatedTimestamp = createdTimestamp
 			newAddress.Status = status
 			newAddress.IsToken = isToken
+			newAddress.IsGovernancePrep = isGovernancePrep
 
 			//////////////////////
 			// Load to postgres //

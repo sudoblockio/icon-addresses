@@ -47,13 +47,14 @@ type configType struct {
 	KafkaGroupID      string `envconfig:"KAFKA_GROUP_ID" required:"false" default:"addresses-service"`
 
 	// Topics
-	ConsumerGroupHead               string `envconfig:"CONSUMER_GROUP_HEAD" required:"false" default:"addresses-consumer-group-head"`
-	ConsumerGroupTail               string `envconfig:"CONSUMER_GROUP_TAIL" required:"false" default:"addresses-consumer-group-tail"`
-	ConsumerGroupBalanceStrategy    string `envconfig:"CONSUMER_GROUP_BALANCE_STRATEGY" required:"false" default:"BalanceStrategySticky"`
-	ConsumerTopicBlocks             string `envconfig:"CONSUMER_TOPIC_BLOCKS" required:"false" default:"blocks"`
-	ConsumerTopicTransactions       string `envconfig:"CONSUMER_TOPIC_TRANSACTIONS" required:"false" default:"transactions"`
-	ConsumerTopicLogs               string `envconfig:"CONSUMER_TOPIC_LOGS" required:"false" default:"logs"`
-	ConsumerTopicContractsProcessed string `envconfig:"CONSUMER_TOPIC_CONTRACT_PROCESSED" required:"false" default:"contracts-processed"`
+	ConsumerGroupHead                     string `envconfig:"CONSUMER_GROUP_HEAD" required:"false" default:"addresses-consumer-group-head"`
+	ConsumerGroupTail                     string `envconfig:"CONSUMER_GROUP_TAIL" required:"false" default:"addresses-consumer-group-tail"`
+	ConsumerGroupBalanceStrategy          string `envconfig:"CONSUMER_GROUP_BALANCE_STRATEGY" required:"false" default:"BalanceStrategySticky"`
+	ConsumerTopicBlocks                   string `envconfig:"CONSUMER_TOPIC_BLOCKS" required:"false" default:"blocks"`
+	ConsumerTopicTransactions             string `envconfig:"CONSUMER_TOPIC_TRANSACTIONS" required:"false" default:"transactions"`
+	ConsumerTopicLogs                     string `envconfig:"CONSUMER_TOPIC_LOGS" required:"false" default:"logs"`
+	ConsumerTopicContractsProcessed       string `envconfig:"CONSUMER_TOPIC_CONTRACTS_PROCESSED" required:"false" default:"contracts-processed"`
+	ConsumerTopicGovernancePrepsProcessed string `envconfig:"CONSUMER_TOPIC_GOVERNANCE_PREPS_PROCESSED" required:"false" default:"governance-preps-processed"`
 
 	// DB
 	DbDriver             string `envconfig:"DB_DRIVER" required:"false" default:"postgres"`
