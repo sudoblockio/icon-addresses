@@ -22,7 +22,7 @@ func governancePrepsTransformer() {
 	consumerTopicChanGovernancePreps := kafka.KafkaTopicConsumers[consumerTopicNameGovernancePreps].TopicChannel
 
 	// Output channels
-	governancePrepLoaderChan := crud.GetGovernancePrepModel().LoaderChannel
+	governancePrepLoaderChan := crud.GetGovernancePrepProcessedModel().LoaderChannel
 
 	zap.S().Debug("GovernancePreps transformer: started working")
 	for {
