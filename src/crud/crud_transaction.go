@@ -2,10 +2,8 @@ package crud
 
 import (
 	"reflect"
-	"strings"
 	"sync"
 
-	"github.com/cenkalti/backoff/v4"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -53,22 +51,6 @@ func GetTransactionModel() *TransactionModel {
 func (m *TransactionModel) Migrate() error {
 	// Only using TransactionRawORM (ORM version of the proto generated struct) to create the TABLE
 	err := m.db.AutoMigrate(m.modelORM) // Migration and Index creation
-	return err
-}
-
-// Insert - Insert transaction into table
-func (m *TransactionModel) Insert(transaction *models.Transaction) error {
-
-	err := backoff.Retry(func() error {
-		query := m.db.Create(transaction)
-		if query.Error != nil && !strings.Contains(query.Error.Error(), "duplicate key value violates unique constraint") {
-			zap.S().Warn("POSTGRES Insert Error : ", query.Error.Error())
-			return query.Error
-		}
-
-		return nil
-	}, backoff.NewExponentialBackOff())
-
 	return err
 }
 

@@ -3,10 +3,8 @@ package crud
 import (
 	"errors"
 	"reflect"
-	"strings"
 	"sync"
 
-	"github.com/cenkalti/backoff/v4"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -54,22 +52,6 @@ func GetBlockModel() *BlockModel {
 func (m *BlockModel) Migrate() error {
 	// Only using BlockRawORM (ORM version of the proto generated struct) to create the TABLE
 	err := m.db.AutoMigrate(m.modelORM) // Migration and Index creation
-	return err
-}
-
-// Insert - Insert block into table
-func (m *BlockModel) Insert(block *models.Block) error {
-
-	err := backoff.Retry(func() error {
-		query := m.db.Create(block)
-		if query.Error != nil && !strings.Contains(query.Error.Error(), "duplicate key value violates unique constraint") {
-			zap.S().Warn("POSTGRES Insert Error : ", query.Error.Error())
-			return query.Error
-		}
-
-		return nil
-	}, backoff.NewExponentialBackOff())
-
 	return err
 }
 

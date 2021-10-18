@@ -55,18 +55,6 @@ func (m *AddressModel) Migrate() error {
 	return err
 }
 
-// Insert - Insert address into table
-func (m *AddressModel) Insert(address *models.Address) error {
-	db := m.db
-
-	// Set table
-	db = db.Model(&models.Address{})
-
-	db = db.Create(address)
-
-	return db.Error
-}
-
 // UpdateOne - update one from addresses table
 func (m *AddressModel) UpdateOne(
 	address *models.Address,

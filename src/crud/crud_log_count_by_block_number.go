@@ -143,7 +143,7 @@ func StartLogCountByBlockNumberLoader() {
 				// Insert
 				err = GetLogCountByBlockNumberModel().Insert(newLogCountByBlockNumber)
 				if err != nil {
-					zap.S().Fatal(err.Error())
+					zap.S().Warn(err.Error())
 				}
 
 				zap.S().Debug("Loader=LogCountByBlockNumber, BlockNumber=", newLogCountByBlockNumber.BlockNumber, " - Insert")

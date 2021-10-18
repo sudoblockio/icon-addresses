@@ -112,7 +112,7 @@ func StartAddressCountLoader() {
 				// Insert
 				err = GetAddressCountModel().Insert(newAddressCount)
 				if err != nil {
-					zap.S().Fatal(err.Error())
+					zap.S().Warn(err.Error())
 				}
 
 				zap.S().Debug("Loader=AddressCount, Address=", newAddressCount.PublicKey, " - Insert")
