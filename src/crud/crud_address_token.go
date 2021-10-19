@@ -115,13 +115,12 @@ func StartAddressTokenLoader() {
 			)
 			if err != nil {
 				// Postgres error
-				zap.S().Info(
+				zap.S().Fatal(
 					"Loader=AddressToken",
 					",Address=", newAddressToken.PublicKey,
 					",TokenContractAddress=", newAddressToken.TokenContractAddress,
-					" - FATAL",
+					" - Error: ", err.Error(),
 				)
-				zap.S().Fatal(err.Error())
 			}
 		}
 	}()

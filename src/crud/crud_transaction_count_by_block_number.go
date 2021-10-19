@@ -123,7 +123,7 @@ func StartTransactionCountByBlockNumberLoader() {
 				// Insert
 				err = GetTransactionCountByBlockNumberModel().Insert(newTransactionCountByBlockNumber)
 				if err != nil {
-					zap.S().Warn(err.Error())
+					zap.S().Warn("Loader=TransactionCountByBlockNumber, BlockNumber=", newTransactionCountByBlockNumber.BlockNumber, " - Error: ", err.Error())
 				}
 
 				zap.S().Debug("Loader=TransactionCountByBlockNumber, BlockNumber=", newTransactionCountByBlockNumber.BlockNumber, " - Insert")

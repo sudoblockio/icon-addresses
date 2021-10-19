@@ -183,15 +183,14 @@ func StartBalanceLoader() {
 			)
 			if err != nil {
 				// Postgres error
-				zap.S().Info(
+				zap.S().Fatal(
 					"Loader=Balance,",
 					"BlockNumber=", newBalance.BlockNumber,
 					"TransactionIndex=", newBalance.TransactionIndex,
 					"LogIndex=", newBalance.LogIndex,
 					"PublicKey=", newBalance.PublicKey,
-					" - FATAL",
+					" - Error: ", err.Error(),
 				)
-				zap.S().Fatal(err.Error())
 			}
 
 			// Force addresses enrichment

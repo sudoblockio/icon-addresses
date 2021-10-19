@@ -107,8 +107,7 @@ func StartGovernancePrepProcessedLoader() {
 			zap.S().Debug("Loader=GovernancePrepProcessed, Address=", newGovernancePrepProcessed.Address, " - Upserted")
 			if err != nil {
 				// Postgres error
-				zap.S().Info("Loader=GovernancePrepProcessed, Address=", newGovernancePrepProcessed.Address, " - FATAL")
-				zap.S().Fatal(err.Error())
+				zap.S().Error("Loader=GovernancePrepProcessed, Address=", newGovernancePrepProcessed.Address, " - Error: ", err.Error())
 			}
 
 			// Force addresses enrichment

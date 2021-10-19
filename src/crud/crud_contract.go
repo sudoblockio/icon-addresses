@@ -107,8 +107,7 @@ func StartContractLoader() {
 			zap.S().Debug("Loader=Contract, Address=", newContract.Address, " - Upserted")
 			if err != nil {
 				// Postgres error
-				zap.S().Info("Loader=Contract, Address=", newContract.Address, " - FATAL")
-				zap.S().Fatal(err.Error())
+				zap.S().Fatal("Loader=Contract, Address=", newContract.Address, " - Error: ", err.Error())
 			}
 
 			// Force addresses enrichment

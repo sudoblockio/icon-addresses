@@ -131,8 +131,7 @@ func StartTransactionLoader() {
 			zap.S().Debug("Loader=Transaction, Hash=", newTransaction.Hash, " LogIndex=", newTransaction.LogIndex, " - Upserted")
 			if err != nil {
 				// Postgres error
-				zap.S().Info("Loader=Transaction, Hash=", newTransaction.Hash, " LogIndex=", newTransaction.LogIndex, " - FATAL")
-				zap.S().Fatal(err.Error())
+				zap.S().Fatal("Loader=Transaction, Hash=", newTransaction.Hash, " LogIndex=", newTransaction.LogIndex, " - Error: ", err.Error())
 			}
 		}
 	}()

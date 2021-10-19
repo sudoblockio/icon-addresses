@@ -128,7 +128,7 @@ func StartTransactionCountByAddressLoader() {
 				// Insert
 				err = GetTransactionCountByAddressModel().Insert(newTransactionCountByAddress)
 				if err != nil {
-					zap.S().Warn(err.Error())
+					zap.S().Warn("Loader=TransactionCountByAddress, Address=", newTransactionCountByAddress.PublicKey, " - Error: ", err.Error())
 				}
 
 				zap.S().Debug("Loader=TransactionCountByAddress, Address=", newTransactionCountByAddress.PublicKey, " - Insert")

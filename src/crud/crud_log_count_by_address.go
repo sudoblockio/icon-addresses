@@ -128,7 +128,7 @@ func StartLogCountByAddressLoader() {
 				// Insert
 				err = GetLogCountByAddressModel().Insert(newLogCountByAddress)
 				if err != nil {
-					zap.S().Warn(err.Error())
+					zap.S().Warn("Loader=LogCountByAddress, Address=", newLogCountByAddress.PublicKey, " - Error: ", err.Error())
 				}
 
 				zap.S().Debug("Loader=LogCountByAddress, Address=", newLogCountByAddress.PublicKey, " - Insert")

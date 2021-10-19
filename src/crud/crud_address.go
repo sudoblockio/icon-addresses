@@ -327,8 +327,7 @@ func StartAddressLoader() {
 			zap.S().Debug("Loader=Address, Address=", newAddress.PublicKey, " - Upserted")
 			if err != nil {
 				// Postgres error
-				zap.S().Info("Loader=Address, Address=", newAddress.PublicKey, " - FATAL")
-				zap.S().Fatal(err.Error())
+				zap.S().Fatal("Loader=Address, Address=", newAddress.PublicKey, " - Error: ", err.Error())
 			}
 		}
 	}()

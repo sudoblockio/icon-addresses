@@ -111,7 +111,7 @@ func StartContractCountLoader() {
 				// Insert
 				err = GetContractCountModel().Insert(newContractCount)
 				if err != nil {
-					zap.S().Warn(err.Error())
+					zap.S().Warn("Loader=ContractCount, Address=", newContractCount.PublicKey, " - Error: ", err.Error())
 				}
 
 				zap.S().Debug("Loader=ContractCount, Address=", newContractCount.PublicKey, " - Insert")
