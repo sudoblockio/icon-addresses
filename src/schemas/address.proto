@@ -20,5 +20,5 @@ message Address {
   bool is_token = 9 [(gorm.field).tag = {index: "address_idx_is_token"}];
 
   // Goveranance 
-  bool is_governance_prep = 10 [(gorm.field).tag = {index: "address_idx_is_governance_prep"}];
+  bool is_prep = 10 [(gorm.field).tag = {index: "address_idx_is_governance_prep"}];
 }

@@ -24,7 +24,7 @@ type AddressORM struct {
 	Balance          float64 `gorm:"index:address_idx_balance"`
 	CreatedTimestamp uint64  `gorm:"index:address_idx_created_timestamp"`
 	IsContract       bool    `gorm:"index:address_idx_is_contract"`
-	IsGovernancePrep bool    `gorm:"index:address_idx_is_governance_prep"`
+	IsPrep           bool    `gorm:"index:address_idx_is_governance_prep"`
 	IsToken          bool    `gorm:"index:address_idx_is_token"`
 	LogCount         uint64  `gorm:"index:address_idx_log_count"`
 	Name             string
@@ -57,7 +57,7 @@ func (m *Address) ToORM(ctx context.Context) (AddressORM, error) {
 	to.Status = m.Status
 	to.CreatedTimestamp = m.CreatedTimestamp
 	to.IsToken = m.IsToken
-	to.IsGovernancePrep = m.IsGovernancePrep
+	to.IsPrep = m.IsPrep
 	if posthook, ok := interface{}(m).(AddressWithAfterToORM); ok {
 		err = posthook.AfterToORM(ctx, &to)
 	}
@@ -83,7 +83,7 @@ func (m *AddressORM) ToPB(ctx context.Context) (Address, error) {
 	to.Status = m.Status
 	to.CreatedTimestamp = m.CreatedTimestamp
 	to.IsToken = m.IsToken
-	to.IsGovernancePrep = m.IsGovernancePrep
+	to.IsPrep = m.IsPrep
 	if posthook, ok := interface{}(m).(AddressWithAfterToPB); ok {
 		err = posthook.AfterToPB(ctx, &to)
 	}
@@ -191,8 +191,8 @@ func DefaultApplyFieldMaskAddress(ctx context.Context, patchee *Address, patcher
 			patchee.IsToken = patcher.IsToken
 			continue
 		}
-		if f == prefix+"IsGovernancePrep" {
-			patchee.IsGovernancePrep = patcher.IsGovernancePrep
+		if f == prefix+"IsPrep" {
+			patchee.IsPrep = patcher.IsPrep
 			continue
 		}
 	}

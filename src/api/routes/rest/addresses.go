@@ -15,7 +15,7 @@ type AddressesQuery struct {
 	Limit      int    `query:"limit"`
 	Skip       int    `query:"skip"`
 	IsContract bool   `query:"is_contract"`
-	PublicKey  string `query:"public_key"`
+	PublicKey  string `query:"address"`
 }
 
 func AddressesAddHandlers(app *fiber.App) {
@@ -23,9 +23,9 @@ func AddressesAddHandlers(app *fiber.App) {
 	prefix := config.Config.RestPrefix + "/addresses"
 
 	app.Get(prefix+"/", handlerGetAddresses)
-	app.Get(prefix+"/details/:public_key", handlerGetAddressDetails)
+	app.Get(prefix+"/details/:address", handlerGetAddressDetails)
 	app.Get(prefix+"/contracts", handlerGetContracts)
-	app.Get(prefix+"/address-tokens/:public_key", handlerGetAddressTokens)
+	app.Get(prefix+"/address-tokens/:address", handlerGetAddressTokens)
 }
 
 // Addresses
@@ -38,7 +38,7 @@ func AddressesAddHandlers(app *fiber.App) {
 // @Param limit query int false "amount of records"
 // @Param skip query int false "skip to a record"
 // @Param is_contract query bool false "contract addresses only"
-// @Param public_key query string false "find by public key"
+// @Param address query string false "find by address"
 // @Router /api/v1/addresses [get]
 // @Success 200 {object} []models.AddressAPIList
 // @Failure 422 {object} map[string]interface{}
@@ -100,12 +100,12 @@ func handlerGetAddresses(c *fiber.Ctx) error {
 // @BasePath /api/v1
 // @Accept */*
 // @Produce json
-// @Param public_key path string true "find by public key"
-// @Router /api/v1/addresses/details/{public_key} [get]
+// @Param address path string true "find by address"
+// @Router /api/v1/addresses/details/{address} [get]
 // @Success 200 {object} models.Address
 // @Failure 422 {object} map[string]interface{}
 func handlerGetAddressDetails(c *fiber.Ctx) error {
-	publicKey := c.Params("public_key")
+	publicKey := c.Params("address")
 	if publicKey == "" {
 		c.Status(422)
 		return c.SendString(`{"error": "public required"}`)
@@ -203,12 +203,12 @@ func handlerGetContracts(c *fiber.Ctx) error {
 // @BasePath /api/v1
 // @Accept */*
 // @Produce json
-// @Param public_key path string true "public_key"
-// @Router /api/v1/addresses/address-tokens/{public_key} [get]
+// @Param address path string true "address"
+// @Router /api/v1/addresses/address-tokens/{address} [get]
 // @Success 200 {object} []string
 // @Failure 422 {object} map[string]interface{}
 func handlerGetAddressTokens(c *fiber.Ctx) error {
-	publicKey := c.Params("public_key")
+	publicKey := c.Params("address")
 
 	// Get AddressTokens
 	addressTokens, err := crud.GetAddressTokenModel().SelectManyByPublicKey(publicKey)

@@ -318,7 +318,7 @@ func StartAddressLoader() {
 			newAddress.CreatedTimestamp = createdTimestamp
 			newAddress.Status = status
 			newAddress.IsToken = isToken
-			newAddress.IsGovernancePrep = isGovernancePrep
+			newAddress.IsPrep = isGovernancePrep
 
 			//////////////////////
 			// Load to postgres //
