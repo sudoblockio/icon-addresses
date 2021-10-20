@@ -29,10 +29,14 @@ func StartWorkerConsumers() {
 	consumerTopicNameBlocks := config.Config.ConsumerTopicBlocks
 	consumerTopicNameTransactions := config.Config.ConsumerTopicTransactions
 	consumerTopicNameLogs := config.Config.ConsumerTopicLogs
+	consumerTopicNameContractsProcessed := config.Config.ConsumerTopicContractsProcessed
+	consumerTopicNameGovernancePrepsProcessed := config.Config.ConsumerTopicGovernancePrepsProcessed
 
 	startKafkaTopicConsumers(consumerTopicNameBlocks)
 	startKafkaTopicConsumers(consumerTopicNameTransactions)
 	startKafkaTopicConsumers(consumerTopicNameLogs)
+	startKafkaTopicConsumers(consumerTopicNameContractsProcessed)
+	startKafkaTopicConsumers(consumerTopicNameGovernancePrepsProcessed)
 }
 
 func startKafkaTopicConsumers(topicName string) {
