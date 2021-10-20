@@ -28,6 +28,8 @@ func main() {
 	transformers.StartBlocksTransformer()
 	transformers.StartTransactionsTransformer()
 	transformers.StartLogsTransformer()
+	transformers.StartContractsTransformer()
+	transformers.StartGovernancePrepsTransformer()
 
 	// Start builders
 	builders.StartBalanceBuilder()
