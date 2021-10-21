@@ -94,14 +94,11 @@ func (m *AddressModel) SelectOne(
 func (m *AddressModel) SelectMany(
 	limit int,
 	skip int,
-	isContract bool,
 ) (*[]models.Address, error) {
 	db := m.db
 
 	// Set table
 	db = db.Model(&models.Address{})
-
-	db = db.Where("is_contract = ?", isContract)
 
 	// Limit
 	db = db.Limit(limit)
@@ -217,7 +214,7 @@ func StartAddressLoader() {
 			/////////////////
 			transactionCount := uint64(0)
 			logCount := uint64(0)
-			balance := float64(0)
+			// balance := float64(0)
 			name := ""                    // Only contracts
 			createdTimestamp := uint64(0) // Only contracts
 			status := ""                  // Only contracts
@@ -260,16 +257,17 @@ func StartAddressLoader() {
 			// Balances //
 			//////////////
 
+			// TODO creating routine for balances temp
 			// current balance
-			currentBalance, err := GetBalanceModel().SelectLatest(newAddress.PublicKey)
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				balance = 0
-			} else if err != nil {
-				// Postgres error
-				zap.S().Fatal(err.Error())
-			} else {
-				balance = currentBalance.ValueDecimal
-			}
+			// currentBalance, err := GetBalanceModel().SelectLatest(newAddress.PublicKey)
+			// if errors.Is(err, gorm.ErrRecordNotFound) {
+			// balance = 0
+			// } else if err != nil {
+			// Postgres error
+			//	zap.S().Fatal(err.Error())
+			// } else {
+			// balance = currentBalance.ValueDecimal
+			// }
 
 			///////////////
 			// Contracts //
@@ -313,7 +311,7 @@ func StartAddressLoader() {
 
 			newAddress.TransactionCount = transactionCount
 			newAddress.LogCount = logCount
-			newAddress.Balance = balance
+			// newAddress.Balance = balance
 			newAddress.Name = name
 			newAddress.CreatedTimestamp = createdTimestamp
 			newAddress.Status = status

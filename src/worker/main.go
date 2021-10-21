@@ -9,6 +9,7 @@ import (
 	"github.com/geometry-labs/icon-addresses/logging"
 	"github.com/geometry-labs/icon-addresses/metrics"
 	"github.com/geometry-labs/icon-addresses/worker/builders"
+	"github.com/geometry-labs/icon-addresses/worker/routines"
 	"github.com/geometry-labs/icon-addresses/worker/transformers"
 )
 
@@ -33,6 +34,9 @@ func main() {
 
 	// Start builders
 	builders.StartBalanceBuilder()
+
+	// Start Routines
+	routines.StartBalanceRoutine()
 
 	global.WaitShutdownSig()
 }

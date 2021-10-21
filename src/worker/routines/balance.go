@@ -1,0 +1,76 @@
+package routines
+
+import (
+	"errors"
+	"math/big"
+	"time"
+
+	"github.com/geometry-labs/icon-addresses/crud"
+	"github.com/geometry-labs/icon-addresses/worker/utils"
+	"go.uber.org/zap"
+	"gorm.io/gorm"
+)
+
+func StartBalanceRoutine() {
+
+	// routine every day
+	go balanceRoutine(86400 * time.Second)
+}
+
+func balanceRoutine(duration time.Duration) {
+
+	// Loop every duration
+	for {
+
+		// Loop through all addresses
+		skip := 0
+		limit := 100
+		for {
+			addresses, err := crud.GetAddressModel().SelectMany(limit, skip)
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				// Sleep
+				break
+			} else if err != nil {
+				zap.S().Fatal(err.Error())
+			}
+			if len(*addresses) == 0 {
+				// Sleep
+				break
+			}
+
+			zap.S().Debug("Routine=Balance", " - Processing ", len(*addresses), " addresses...")
+			for _, a := range *addresses {
+
+				// Node call
+				balance, err := utils.IconNodeServiceGetBalanceOf(a.PublicKey)
+				if err != nil {
+					// Icon node error
+					zap.S().Warn("Routine=Balance, publicKey=", a.PublicKey, " - Error: ", err.Error())
+					continue
+				}
+
+				// Hex -> float64
+				balanceBigInt, _ := new(big.Int).SetString(balance[2:], 16)
+				balanceDecimal := float64(0)
+
+				baseBigFloat, _ := new(big.Float).SetString("1000000000000000000") // 10^18
+				balanceBigFloat := new(big.Float).SetInt(balanceBigInt)
+
+				// newValue / 10^18
+				balanceBigFloat = balanceBigFloat.Quo(balanceBigFloat, baseBigFloat)
+
+				balanceDecimal, _ = balanceBigFloat.Float64()
+
+				a.Balance = balanceDecimal
+
+				// Insert to database
+				crud.GetAddressModel().LoaderChannel <- &a
+				zap.S().Debug("PUBLICKEY=", a.PublicKey, ",BALANCE=", balanceDecimal)
+			}
+
+			skip += limit
+		}
+
+		time.Sleep(duration)
+	}
+}
