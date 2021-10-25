@@ -5,10 +5,13 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/geometry-labs/icon-addresses/crud"
-	"github.com/geometry-labs/icon-addresses/worker/utils"
+	"github.com/jinzhu/copier"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+
+	"github.com/geometry-labs/icon-addresses/crud"
+	"github.com/geometry-labs/icon-addresses/models"
+	"github.com/geometry-labs/icon-addresses/worker/utils"
 )
 
 func StartBalanceRoutine() {
@@ -63,8 +66,12 @@ func balanceRoutine(duration time.Duration) {
 
 				a.Balance = balanceDecimal
 
+				// Copy struct for pointer conflicts
+				addressCopy := &models.Address{}
+				copier.Copy(addressCopy, &a)
+
 				// Insert to database
-				crud.GetAddressModel().LoaderChannel <- &a
+				crud.GetAddressModel().LoaderChannel <- addressCopy
 				zap.S().Debug("PUBLICKEY=", a.PublicKey, ",BALANCE=", balanceDecimal)
 			}
 
