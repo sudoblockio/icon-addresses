@@ -22,6 +22,13 @@ func main() {
 	// Start Prometheus client
 	metrics.Start()
 
+	if config.Config.OnlyRunBalanceRoutine == true {
+		// Start Routines
+		routines.StartBalanceRoutine()
+
+		global.WaitShutdownSig()
+	}
+
 	// Start kafka consumer
 	kafka.StartWorkerConsumers()
 
@@ -34,9 +41,6 @@ func main() {
 
 	// Start builders
 	builders.StartBalanceBuilder()
-
-	// Start Routines
-	routines.StartBalanceRoutine()
 
 	global.WaitShutdownSig()
 }
