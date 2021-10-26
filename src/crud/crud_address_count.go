@@ -2,12 +2,15 @@ package crud
 
 import (
 	"errors"
+	"reflect"
 	"sync"
 
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"github.com/geometry-labs/icon-addresses/models"
+	"github.com/geometry-labs/icon-addresses/redis"
 )
 
 // AddressCountModel - type for address table model
@@ -53,72 +56,173 @@ func (m *AddressCountModel) Migrate() error {
 	return err
 }
 
-// Insert - Insert addressCount into table
-func (m *AddressCountModel) Insert(addressCount *models.AddressCount) error {
-	db := m.db
-
-	// Set table
-	db = db.Model(&models.AddressCount{})
-
-	db = db.Create(addressCount)
-
-	return db.Error
-}
-
 // Select - select from addressCounts table
-func (m *AddressCountModel) SelectOne(publicKey string) (models.AddressCount, error) {
+func (m *AddressCountModel) SelectOne(_type string) (*models.AddressCount, error) {
 	db := m.db
 
 	// Set table
 	db = db.Model(&models.AddressCount{})
 
-	addressCount := models.AddressCount{}
+	// Address
+	db = db.Where("type = ?", _type)
 
-	// Transaction Hash
-	db = db.Where("public_key = ?", publicKey)
-
-	db = db.First(&addressCount)
+	addressCount := &models.AddressCount{}
+	db = db.First(addressCount)
 
 	return addressCount, db.Error
 }
 
-func (m *AddressCountModel) SelectLargestCount() (uint64, error) {
+// Select - select from addressCounts table
+func (m *AddressCountModel) SelectCount(_type string) (uint64, error) {
 	db := m.db
 
 	// Set table
 	db = db.Model(&models.AddressCount{})
 
-	// Get max id
+	// Address
+	db = db.Where("type = ?", _type)
+
+	addressCount := &models.AddressCount{}
+	db = db.First(addressCount)
+
 	count := uint64(0)
-	row := db.Select("max(id)").Row()
-	row.Scan(&count)
+	if addressCount != nil {
+		count = addressCount.Count
+	}
 
 	return count, db.Error
+}
+
+func (m *AddressCountModel) UpsertOne(
+	addressCount *models.AddressCount,
+) error {
+	db := m.db
+
+	// map[string]interface{}
+	updateOnConflictValues := extractFilledFieldsFromModel(
+		reflect.ValueOf(*addressCount),
+		reflect.TypeOf(*addressCount),
+	)
+
+	// Upsert
+	db = db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "type"}}, // NOTE set to primary keys for table
+		DoUpdates: clause.Assignments(updateOnConflictValues),
+	}).Create(addressCount)
+
+	return db.Error
 }
 
 // StartAddressCountLoader starts loader
 func StartAddressCountLoader() {
 	go func() {
+		postgresLoaderChan := GetAddressCountModel().LoaderChannel
 
 		for {
-			// Read addressCount
-			newAddressCount := <-GetAddressCountModel().LoaderChannel
+			// Read address
+			newAddressCount := <-postgresLoaderChan
 
-			// Insert
-			_, err := GetAddressCountModel().SelectOne(
-				newAddressCount.PublicKey,
-			)
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				// Insert
-				err = GetAddressCountModel().Insert(newAddressCount)
-				if err != nil {
-					zap.S().Warn("Loader=AddressCount, Address=", newAddressCount.PublicKey, " - ERROR: ", err.Error())
+			//////////////////////////
+			// Get count from redis //
+			//////////////////////////
+			countKey := "icon_addresses_address_count_" + newAddressCount.Type
+
+			count, err := redis.GetRedisClient().GetCount(countKey)
+			if err != nil {
+				zap.S().Fatal(
+					"Loader=AddressCount,",
+					"PublicKey=", newAddressCount.PublicKey,
+					" Type=", newAddressCount.Type,
+					" - Error: ", err.Error())
+			}
+
+			// No count set yet
+			// Get from database
+			if count == -1 {
+				curAddressCount, err := GetAddressCountModel().SelectOne(newAddressCount.Type)
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					count = 0
+				} else if err != nil {
+					zap.S().Fatal(
+						"Loader=AddressCount,",
+						"PublicKey=", newAddressCount.PublicKey,
+						" Type=", newAddressCount.Type,
+						" - Error: ", err.Error())
+				} else {
+					count = int64(curAddressCount.Count)
 				}
 
-				zap.S().Debug("Loader=AddressCount, Address=", newAddressCount.PublicKey, " - Insert")
-			} else if err != nil {
-				// Error
-				zap.S().Fatal(err.Error())
+				// Set count
+				err = redis.GetRedisClient().SetCount(countKey, int64(count))
+				if err != nil {
+					// Redis error
+					zap.S().Fatal(
+						"Loader=AddressCount,",
+						"PublicKey=", newAddressCount.PublicKey,
+						" Type=", newAddressCount.Type,
+						" - Error: ", err.Error())
+				}
+			}
+
+			//////////////////////
+			// Load to postgres //
+			//////////////////////
+
+			// Add address to indexed
+			if newAddressCount.Type == "all" {
+				newAddressCountIndex := &models.AddressCountIndex{
+					PublicKey: newAddressCount.PublicKey,
+				}
+				err = GetAddressCountIndexModel().Insert(newAddressCountIndex)
+				if err != nil {
+					// Record already exists, continue
+					continue
+				}
+			} else if newAddressCount.Type == "contract" {
+				newAddressContractCountIndex := &models.AddressContractCountIndex{
+					PublicKey: newAddressCount.PublicKey,
+				}
+				err = GetAddressContractCountIndexModel().Insert(newAddressContractCountIndex)
+				if err != nil {
+					// Record already exists, continue
+					continue
+				}
+			} else if newAddressCount.Type == "token" {
+				newAddressTokenCountIndex := &models.AddressTokenCountIndex{
+					PublicKey: newAddressCount.PublicKey,
+				}
+				err = GetAddressTokenCountIndexModel().Insert(newAddressTokenCountIndex)
+				if err != nil {
+					// Record already exists, continue
+					continue
+				}
+			}
+
+			// Increment records
+			count, err = redis.GetRedisClient().IncCount(countKey)
+			if err != nil {
+				// Redis error
+				zap.S().Fatal(
+					"Loader=AddressCount,",
+					"PublicKey=", newAddressCount.PublicKey,
+					" Type=", newAddressCount.Type,
+					" - Error: ", err.Error())
+			}
+			newAddressCount.Count = uint64(count)
+
+			err = GetAddressCountModel().UpsertOne(newAddressCount)
+			zap.S().Debug(
+				"Loader=AddressCount,",
+				"PublicKey=", newAddressCount.PublicKey,
+				" Type=", newAddressCount.Type,
+				" - Upsert")
+			if err != nil {
+				// Postgres error
+				zap.S().Fatal(
+					"Loader=AddressCount,",
+					"PublicKey=", newAddressCount.PublicKey,
+					" Type=", newAddressCount.Type,
+					" - Error: ", err.Error())
 			}
 		}
 	}()

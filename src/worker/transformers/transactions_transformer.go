@@ -28,7 +28,6 @@ func transactionsTransformer() {
 	// Output channels
 	addressLoaderChan := crud.GetAddressModel().LoaderChannel
 	addressCountLoaderChan := crud.GetAddressCountModel().LoaderChannel
-	contractCountLoaderChan := crud.GetContractCountModel().LoaderChannel
 	transactionLoaderChan := crud.GetTransactionModel().LoaderChannel
 	transactionCountByAddressLoaderChan := crud.GetTransactionCountByAddressModel().LoaderChannel
 	transactionCountByBlockNumberLoaderChan := crud.GetTransactionCountByBlockNumberModel().LoaderChannel
@@ -64,28 +63,32 @@ func transactionsTransformer() {
 			addressLoaderChan <- toAddress
 		}
 
-		// Loads to addresses_count (from address)
+		// Loads to addresses_count (from address) (all)
 		if fromAddress != nil {
-			fromAddressCount := transformAddressToAddressCount(fromAddress)
+			fromAddressCount := transformAddressToAddressCountAll(fromAddress)
 			addressCountLoaderChan <- fromAddressCount
 		}
 
-		// Loads to addresses_count (to address)
+		// Loads to addresses_count (to address) (all)
 		if toAddress != nil {
-			toAddressCount := transformAddressToAddressCount(toAddress)
+			toAddressCount := transformAddressToAddressCountAll(toAddress)
 			addressCountLoaderChan <- toAddressCount
 		}
 
-		// Loads to contract_count (from address)
-		if fromAddress != nil && fromAddress.IsContract == true {
-			fromContract := transformAddressToContractCount(fromAddress)
-			contractCountLoaderChan <- fromContract
+		// Loads to addresses_count (from address) (contract)
+		if fromAddress != nil {
+			fromAddressCountContract := transformAddressToAddressCountContract(fromAddress)
+			if fromAddressCountContract != nil {
+				addressCountLoaderChan <- fromAddressCountContract
+			}
 		}
 
-		// Loads to contract_count (to address)
-		if toAddress != nil && toAddress.IsContract == true {
-			toContract := transformAddressToContractCount(toAddress)
-			contractCountLoaderChan <- toContract
+		// Loads to addresses_count (to address) (contract)
+		if toAddress != nil {
+			toAddressCountContract := transformAddressToAddressCountContract(toAddress)
+			if toAddressCountContract != nil {
+				addressCountLoaderChan <- toAddressCountContract
+			}
 		}
 
 		// Loads to transactions
@@ -156,16 +159,24 @@ func transformTransactionRawToAddress(txRaw *models.TransactionRaw, useFromAddre
 	}
 }
 
-func transformAddressToAddressCount(address *models.Address) *models.AddressCount {
+func transformAddressToAddressCountAll(address *models.Address) *models.AddressCount {
 
 	return &models.AddressCount{
+		Type:      "all",
+		Count:     0, // Adds in loader
 		PublicKey: address.PublicKey,
 	}
 }
 
-func transformAddressToContractCount(address *models.Address) *models.ContractCount {
+func transformAddressToAddressCountContract(address *models.Address) *models.AddressCount {
 
-	return &models.ContractCount{
+	if address.IsContract == false {
+		return nil
+	}
+
+	return &models.AddressCount{
+		Type:      "contract",
+		Count:     0, // Adds in loader
 		PublicKey: address.PublicKey,
 	}
 }

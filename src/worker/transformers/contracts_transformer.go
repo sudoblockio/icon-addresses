@@ -23,6 +23,7 @@ func contractsTransformer() {
 
 	// Output channels
 	contractLoaderChan := crud.GetContractModel().LoaderChannel
+	addressCountLoaderChan := crud.GetAddressCountModel().LoaderChannel
 
 	zap.S().Debug("Contracts transformer: started working")
 	for {
@@ -44,6 +45,11 @@ func contractsTransformer() {
 
 		// Load to: contracts
 		contractLoaderChan <- contractRaw
+
+		addressCountToken := transformContractToAddressCountToken(contractRaw)
+		if addressCountToken != nil {
+			addressCountLoaderChan <- addressCountToken
+		}
 	}
 }
 
@@ -54,4 +60,17 @@ func convertToContractRawProtoBuf(value []byte) (*models.ContractProcessed, erro
 		zap.S().Error("Error: ", err.Error())
 	}
 	return &contract, err
+}
+
+func transformContractToAddressCountToken(contract *models.ContractProcessed) *models.AddressCount {
+
+	if contract.IsToken == false {
+		return nil
+	}
+
+	return &models.AddressCount{
+		Type:      "token",
+		Count:     0, // Adds in loader
+		PublicKey: contract.Address,
+	}
 }
