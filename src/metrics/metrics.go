@@ -28,6 +28,16 @@ var (
 		Help:        "max block number read from the logs_raw topic",
 		ConstLabels: prometheus.Labels{"network_name": config.Config.NetworkName},
 	})
+	BalanceRoutineNumRuns = promauto.NewGauge(prometheus.GaugeOpts{
+		Name:        "balance_routine_num_runs",
+		Help:        "Number of times the balance routine has completed",
+		ConstLabels: prometheus.Labels{"network_name": config.Config.NetworkName},
+	})
+	BalanceRoutineNumAddressesComputed = promauto.NewGauge(prometheus.GaugeOpts{
+		Name:        "balance_routine_num_addresses_computed",
+		Help:        "Number of addresses the balance routine has computed in current run",
+		ConstLabels: prometheus.Labels{"network_name": config.Config.NetworkName},
+	})
 )
 
 func Start() {

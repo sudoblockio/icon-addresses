@@ -10,6 +10,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/geometry-labs/icon-addresses/crud"
+	"github.com/geometry-labs/icon-addresses/metrics"
 	"github.com/geometry-labs/icon-addresses/models"
 	"github.com/geometry-labs/icon-addresses/worker/utils"
 )
@@ -21,6 +22,10 @@ func StartBalanceRoutine() {
 }
 
 func balanceRoutine(duration time.Duration) {
+
+	// Init metrics
+	metrics.BalanceRoutineNumRuns.Set(float64(0))
+	metrics.BalanceRoutineNumAddressesComputed.Set(float64(0))
 
 	// Loop every duration
 	for {
@@ -41,7 +46,7 @@ func balanceRoutine(duration time.Duration) {
 				break
 			}
 
-			zap.S().Debug("Routine=Balance", " - Processing ", len(*addresses), " addresses...")
+			zap.S().Info("Routine=Balance", " - Processing ", len(*addresses), " addresses...")
 			for _, a := range *addresses {
 
 				// Node call
@@ -72,12 +77,16 @@ func balanceRoutine(duration time.Duration) {
 
 				// Insert to database
 				crud.GetAddressModel().LoaderChannel <- addressCopy
-				zap.S().Debug("PUBLICKEY=", a.PublicKey, ",BALANCE=", balanceDecimal)
+				zap.S().Info("PUBLICKEY=", a.PublicKey, ",BALANCE=", balanceDecimal)
+				metrics.BalanceRoutineNumAddressesComputed.Inc()
 			}
 
 			skip += limit
 		}
 
+		zap.S().Info("Completed routine, sleeping...")
+		metrics.BalanceRoutineNumRuns.Inc()
+		metrics.BalanceRoutineNumAddressesComputed.Set(float64(0))
 		time.Sleep(duration)
 	}
 }
