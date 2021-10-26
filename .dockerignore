@@ -1,2 +1,4 @@
 volumes
 src/docs/*
+.github
+docker-compose.*
