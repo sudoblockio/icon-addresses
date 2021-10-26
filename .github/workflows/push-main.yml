@@ -133,6 +133,6 @@ jobs:
           value: ${{ github.run_number }}
           branch: main
           createPR: 'false'
-          message: 'Update dev deployment (mainnet) image versions to ${{ github.run_number }}'
+          message: 'addresses dev deployment (mainnet) image versions to ${{ github.run_number }}'
           token: ${{ secrets.ICON_CHARTS_PAT }}
           updateFile: true
