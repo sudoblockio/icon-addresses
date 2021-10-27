@@ -4,10 +4,10 @@ option go_package = "./models";
 
 import "github.com/infobloxopen/protoc-gen-gorm/options/gorm.proto";
 
-message TransactionCountByAddress {
+// Used by transaction_count_by_addresses to ensure no double counts
+message TransactionCountByPublicKeyIndex {
   option (gorm.opts) = {ormable: true};
 
   string transaction_hash = 1 [(gorm.field).tag = {primary_key: true}];
   string public_key = 2 [(gorm.field).tag = {primary_key: true}];
-  uint64 count = 3 [(gorm.field).tag = {index: "transaction_count_by_address_idx_count"}];
 }

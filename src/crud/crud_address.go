@@ -226,7 +226,7 @@ func StartAddressLoader() {
 			//////////////////////////////////
 
 			// transaction count
-			count, err := GetTransactionCountByAddressModel().SelectLargestCountByPublicKey(
+			count, err := GetTransactionCountByPublicKeyModel().SelectCount(
 				newAddress.PublicKey,
 			)
 			if errors.Is(err, gorm.ErrRecordNotFound) {

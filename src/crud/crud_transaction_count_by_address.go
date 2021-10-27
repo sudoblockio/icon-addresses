@@ -2,148 +2,188 @@ package crud
 
 import (
 	"errors"
+	"reflect"
 	"sync"
 
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"github.com/geometry-labs/icon-addresses/models"
+	"github.com/geometry-labs/icon-addresses/redis"
 )
 
-// TransactionCountByAddressModel - type for address table model
-type TransactionCountByAddressModel struct {
+// TransactionCountByPublicKeyModel - type for address table model
+type TransactionCountByPublicKeyModel struct {
 	db            *gorm.DB
-	model         *models.TransactionCountByAddress
-	modelORM      *models.TransactionCountByAddressORM
-	LoaderChannel chan *models.TransactionCountByAddress
+	model         *models.TransactionCountByPublicKey
+	modelORM      *models.TransactionCountByPublicKeyORM
+	LoaderChannel chan *models.TransactionCountByPublicKey
 }
 
-var transactionCountByAddressModel *TransactionCountByAddressModel
-var transactionCountByAddressModelOnce sync.Once
+var transactionCountByPublicKeyModel *TransactionCountByPublicKeyModel
+var transactionCountByPublicKeyModelOnce sync.Once
 
-// GetAddressModel - create and/or return the addresss table model
-func GetTransactionCountByAddressModel() *TransactionCountByAddressModel {
-	transactionCountByAddressModelOnce.Do(func() {
+// GetPublicKeyModel - create and/or return the addresss table model
+func GetTransactionCountByPublicKeyModel() *TransactionCountByPublicKeyModel {
+	transactionCountByPublicKeyModelOnce.Do(func() {
 		dbConn := getPostgresConn()
 		if dbConn == nil {
 			zap.S().Fatal("Cannot connect to postgres database")
 		}
 
-		transactionCountByAddressModel = &TransactionCountByAddressModel{
+		transactionCountByPublicKeyModel = &TransactionCountByPublicKeyModel{
 			db:            dbConn,
-			model:         &models.TransactionCountByAddress{},
-			LoaderChannel: make(chan *models.TransactionCountByAddress, 1),
+			model:         &models.TransactionCountByPublicKey{},
+			LoaderChannel: make(chan *models.TransactionCountByPublicKey, 1),
 		}
 
-		err := transactionCountByAddressModel.Migrate()
+		err := transactionCountByPublicKeyModel.Migrate()
 		if err != nil {
-			zap.S().Fatal("TransactionCountByAddressModel: Unable migrate postgres table: ", err.Error())
+			zap.S().Fatal("TransactionCountByPublicKeyModel: Unable migrate postgres table: ", err.Error())
 		}
 
-		StartTransactionCountByAddressLoader()
+		StartTransactionCountByPublicKeyLoader()
 	})
 
-	return transactionCountByAddressModel
+	return transactionCountByPublicKeyModel
 }
 
-// Migrate - migrate transactionCountByAddresss table
-func (m *TransactionCountByAddressModel) Migrate() error {
-	// Only using TransactionCountByAddressRawORM (ORM version of the proto generated struct) to create the TABLE
+// Migrate - migrate transactionCountByPublicKeys table
+func (m *TransactionCountByPublicKeyModel) Migrate() error {
+	// Only using TransactionCountByPublicKeyRawORM (ORM version of the proto generated struct) to create the TABLE
 	err := m.db.AutoMigrate(m.modelORM) // Migration and Index creation
 	return err
 }
 
-// Insert - Insert transactionCountByAddress into table
-func (m *TransactionCountByAddressModel) Insert(transactionCountByAddress *models.TransactionCountByAddress) error {
+// Select - select from transactionCountByPublicKeys table
+func (m *TransactionCountByPublicKeyModel) SelectOne(publicKey string) (*models.TransactionCountByPublicKey, error) {
 	db := m.db
 
 	// Set table
-	db = db.Model(&models.TransactionCountByAddress{})
+	db = db.Model(&models.TransactionCountByPublicKey{})
 
-	db = db.Create(transactionCountByAddress)
-
-	return db.Error
-}
-
-// Select - select from transactionCountByAddresss table
-func (m *TransactionCountByAddressModel) SelectOne(transactionHash string, publicKey string) (models.TransactionCountByAddress, error) {
-	db := m.db
-
-	// Set table
-	db = db.Model(&models.TransactionCountByAddress{})
-
-	// Transaction Hash
-	db = db.Where("transaction_hash = ?", transactionHash)
-
-	// Public Key
+	// PublicKey
 	db = db.Where("public_key = ?", publicKey)
 
-	transactionCountByAddress := models.TransactionCountByAddress{}
-	db = db.First(&transactionCountByAddress)
+	transactionCountByPublicKey := &models.TransactionCountByPublicKey{}
+	db = db.First(transactionCountByPublicKey)
 
-	return transactionCountByAddress, db.Error
+	return transactionCountByPublicKey, db.Error
 }
 
-func (m *TransactionCountByAddressModel) SelectLargestCountByPublicKey(publicKey string) (uint64, error) {
-	// TODO
-	return 0, nil
+// Select - select from transactionCountByPublicKeys table
+func (m *TransactionCountByPublicKeyModel) SelectCount(publicKey string) (uint64, error) {
 	db := m.db
 
 	// Set table
-	db = db.Model(&models.TransactionCountByAddress{})
+	db = db.Model(&models.TransactionCountByPublicKey{})
 
+	// PublicKey
 	db = db.Where("public_key = ?", publicKey)
 
-	// Get max id
+	transactionCountByPublicKey := &models.TransactionCountByPublicKey{}
+	db = db.First(transactionCountByPublicKey)
+
 	count := uint64(0)
-	row := db.Select("max(count)").Row()
-	row.Scan(&count)
+	if transactionCountByPublicKey != nil {
+		count = transactionCountByPublicKey.Count
+	}
 
 	return count, db.Error
 }
 
-// StartTransactionCountByAddressLoader starts loader
-func StartTransactionCountByAddressLoader() {
+func (m *TransactionCountByPublicKeyModel) UpsertOne(
+	transactionCountByPublicKey *models.TransactionCountByPublicKey,
+) error {
+	db := m.db
+
+	// map[string]interface{}
+	updateOnConflictValues := extractFilledFieldsFromModel(
+		reflect.ValueOf(*transactionCountByPublicKey),
+		reflect.TypeOf(*transactionCountByPublicKey),
+	)
+
+	// Upsert
+	db = db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "public_key"}}, // NOTE set to primary keys for table
+		DoUpdates: clause.Assignments(updateOnConflictValues),
+	}).Create(transactionCountByPublicKey)
+
+	return db.Error
+}
+
+// StartTransactionCountByPublicKeyLoader starts loader
+func StartTransactionCountByPublicKeyLoader() {
 	go func() {
+		postgresLoaderChan := GetTransactionCountByPublicKeyModel().LoaderChannel
 
 		for {
-			// Read transactionCountByAddress
-			newTransactionCountByAddress := <-GetTransactionCountByAddressModel().LoaderChannel
+			// Read transaction
+			newTransactionCountByPublicKey := <-postgresLoaderChan
 
-			// Insert
-			_, err := GetTransactionCountByAddressModel().SelectOne(
-				newTransactionCountByAddress.TransactionHash,
-				newTransactionCountByAddress.PublicKey,
-			)
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				// Last count
-				lastCount, err := GetTransactionCountByAddressModel().SelectLargestCountByPublicKey(
-					newTransactionCountByAddress.PublicKey,
-				)
-				if err != nil {
-					zap.S().Fatal(err.Error())
-				}
-				newTransactionCountByAddress.Count = lastCount + 1
+			//////////////////////////
+			// Get count from redis //
+			//////////////////////////
+			countKey := "icon_addresses_transaction_count_by_address_" + newTransactionCountByPublicKey.PublicKey
 
-				// Insert
-				err = GetTransactionCountByAddressModel().Insert(newTransactionCountByAddress)
-				if err != nil {
-					zap.S().Warn("Loader=TransactionCountByAddress, Address=", newTransactionCountByAddress.PublicKey, " - Error: ", err.Error())
-				}
-
-				zap.S().Debug("Loader=TransactionCountByAddress, Address=", newTransactionCountByAddress.PublicKey, " - Insert")
-			} else if err != nil {
-				// Error
-				zap.S().Fatal(err.Error())
+			count, err := redis.GetRedisClient().GetCount(countKey)
+			if err != nil {
+				zap.S().Fatal("Loader=Transaction, Hash=", newTransactionCountByPublicKey.TransactionHash, " PublicKey=", newTransactionCountByPublicKey.PublicKey, " - Error: ", err.Error())
 			}
 
-			///////////////////////
-			// Force enrichments //
-			///////////////////////
-			err = reloadAddress(newTransactionCountByAddress.PublicKey)
+			// No count set yet
+			// Get from database
+			if count == -1 {
+				curTransactionCountByPublicKey, err := GetTransactionCountByPublicKeyModel().SelectOne(newTransactionCountByPublicKey.PublicKey)
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					count = 0
+				} else if err != nil {
+					zap.S().Fatal(
+						"Loader=Transaction,",
+						"Hash=", newTransactionCountByPublicKey.TransactionHash,
+						" PublicKey=", newTransactionCountByPublicKey.PublicKey,
+						" - Error: ", err.Error())
+				} else {
+					count = int64(curTransactionCountByPublicKey.Count)
+				}
+
+				// Set count
+				err = redis.GetRedisClient().SetCount(countKey, int64(count))
+				if err != nil {
+					// Redis error
+					zap.S().Fatal("Loader=Transaction, Hash=", newTransactionCountByPublicKey.TransactionHash, " PublicKey=", newTransactionCountByPublicKey.PublicKey, " - Error: ", err.Error())
+				}
+			}
+
+			//////////////////////
+			// Load to postgres //
+			//////////////////////
+
+			// Add transaction to indexed
+			newTransactionCountByPublicKeyIndex := &models.TransactionCountByPublicKeyIndex{
+				TransactionHash: newTransactionCountByPublicKey.TransactionHash,
+				PublicKey:       newTransactionCountByPublicKey.PublicKey,
+			}
+			err = GetTransactionCountByPublicKeyIndexModel().Insert(newTransactionCountByPublicKeyIndex)
 			if err != nil {
-				// Postgress error
-				zap.S().Fatal(err.Error())
+				// Record already exists, continue
+				continue
+			}
+
+			// Increment records
+			count, err = redis.GetRedisClient().IncCount(countKey)
+			if err != nil {
+				// Redis error
+				zap.S().Fatal("Loader=Transaction, Hash=", newTransactionCountByPublicKey.TransactionHash, " PublicKey=", newTransactionCountByPublicKey.PublicKey, " - Error: ", err.Error())
+			}
+			newTransactionCountByPublicKey.Count = uint64(count)
+
+			err = GetTransactionCountByPublicKeyModel().UpsertOne(newTransactionCountByPublicKey)
+			zap.S().Debug("Loader=Transaction, Hash=", newTransactionCountByPublicKey.TransactionHash, " PublicKey=", newTransactionCountByPublicKey.PublicKey, " - Upserted")
+			if err != nil {
+				// Postgres error
+				zap.S().Fatal("Loader=Transaction, Hash=", newTransactionCountByPublicKey.TransactionHash, " PublicKey=", newTransactionCountByPublicKey.PublicKey, " - Error: ", err.Error())
 			}
 		}
 	}()

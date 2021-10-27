@@ -29,7 +29,7 @@ func transactionsTransformer() {
 	addressLoaderChan := crud.GetAddressModel().LoaderChannel
 	addressCountLoaderChan := crud.GetAddressCountModel().LoaderChannel
 	transactionLoaderChan := crud.GetTransactionModel().LoaderChannel
-	transactionCountByAddressLoaderChan := crud.GetTransactionCountByAddressModel().LoaderChannel
+	transactionCountByPublicKeyLoaderChan := crud.GetTransactionCountByPublicKeyModel().LoaderChannel
 	transactionCountByBlockNumberLoaderChan := crud.GetTransactionCountByBlockNumberModel().LoaderChannel
 
 	zap.S().Debug("Transactions Transformer: started working")
@@ -97,16 +97,16 @@ func transactionsTransformer() {
 			transactionLoaderChan <- transaction
 		}
 
-		// Loads to transaction_count_by_addresses (from address)
-		transactionCountByAddressFromAddress := transformTransactionRawToTransactionCountByAddress(transactionRaw, true)
-		if transactionCountByAddressFromAddress != nil {
-			transactionCountByAddressLoaderChan <- transactionCountByAddressFromAddress
+		// Loads to transaction_count_by_public_key (from address)
+		transactionCountByPublicKeyFromAddress := transformTransactionRawToTransactionCountByPublicKey(transactionRaw, true)
+		if transactionCountByPublicKeyFromAddress != nil {
+			transactionCountByPublicKeyLoaderChan <- transactionCountByPublicKeyFromAddress
 		}
 
-		// Loads to transaction_count_by_addresses (to address)
-		transactionCountByAddressToAddress := transformTransactionRawToTransactionCountByAddress(transactionRaw, false)
-		if transactionCountByAddressToAddress != nil {
-			transactionCountByAddressLoaderChan <- transactionCountByAddressToAddress
+		// Loads to transaction_count_by_public_key (to address)
+		transactionCountByPublicKeyToAddress := transformTransactionRawToTransactionCountByPublicKey(transactionRaw, false)
+		if transactionCountByPublicKeyToAddress != nil {
+			transactionCountByPublicKeyLoaderChan <- transactionCountByPublicKeyToAddress
 		}
 
 		// Loads to transaction_count_by_block_number
@@ -211,7 +211,7 @@ func transformTransactionRawToTransaction(txRaw *models.TransactionRaw) *models.
 	}
 }
 
-func transformTransactionRawToTransactionCountByAddress(txRaw *models.TransactionRaw, isFromAddress bool) *models.TransactionCountByAddress {
+func transformTransactionRawToTransactionCountByPublicKey(txRaw *models.TransactionRaw, isFromAddress bool) *models.TransactionCountByPublicKey {
 
 	// Public Key
 	publicKey := ""
@@ -225,7 +225,7 @@ func transformTransactionRawToTransactionCountByAddress(txRaw *models.Transactio
 		return nil
 	}
 
-	return &models.TransactionCountByAddress{
+	return &models.TransactionCountByPublicKey{
 		TransactionHash: txRaw.Hash,
 		PublicKey:       publicKey,
 		Count:           0, // Adds in loader
