@@ -18,7 +18,7 @@ import (
 func StartBalanceRoutine() {
 
 	// routine every day
-	go balanceRoutine(86400 * time.Second)
+	go balanceRoutine(3600 * time.Second)
 }
 
 func balanceRoutine(duration time.Duration) {
