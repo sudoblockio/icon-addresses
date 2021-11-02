@@ -8,10 +8,6 @@
 
 Off chain indexer for the ICON Blockchain serving the **addresses** context of the [icon-explorer](https://github.com/geometry-labs/icon-explorer). Service is broken up into API and worker components that are run as individual docker containers. It depends on data coming in from [icon-etl](https://github.com/geometry-labs/icon-etl) over a Kafka message queue with persistence on a postgres database. 
 
-### Endpoints 
-
-TODO: Links and table 
-
 ### Deployment 
 
 Service can be run in the following ways:
