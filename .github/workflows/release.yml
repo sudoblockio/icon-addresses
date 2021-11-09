@@ -193,6 +193,8 @@ jobs:
 
       - name: Push tags
         run: |
+          git stash
+          git pull
           git tag -f addresses-prod-uswest2
           git tag -f addresses-prod-euwest2
           git push -f origin --tags
