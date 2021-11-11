@@ -118,7 +118,6 @@ func (m *AddressModel) SelectMany(
 func (m *AddressModel) SelectManyAPI(
 	limit int,
 	skip int,
-	isContract bool,
 	publicKey string,
 ) (*[]models.AddressAPIList, error) {
 	db := m.db
@@ -128,9 +127,6 @@ func (m *AddressModel) SelectManyAPI(
 
 	// Order balances
 	db = db.Order("balance DESC")
-
-	// Is contract
-	db = db.Where("is_contract = ?", isContract)
 
 	// Public key
 	if publicKey != "" {

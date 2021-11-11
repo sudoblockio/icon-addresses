@@ -12,10 +12,9 @@ import (
 )
 
 type AddressesQuery struct {
-	Limit      int    `query:"limit"`
-	Skip       int    `query:"skip"`
-	IsContract bool   `query:"is_contract"`
-	PublicKey  string `query:"address"`
+	Limit     int    `query:"limit"`
+	Skip      int    `query:"skip"`
+	PublicKey string `query:"address"`
 }
 
 func AddressesAddHandlers(app *fiber.App) {
@@ -70,7 +69,6 @@ func handlerGetAddresses(c *fiber.Ctx) error {
 	addresses, err := crud.GetAddressModel().SelectManyAPI(
 		params.Limit,
 		params.Skip,
-		params.IsContract,
 		params.PublicKey,
 	)
 	if err != nil {
