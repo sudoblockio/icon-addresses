@@ -23,7 +23,7 @@ func logsTransformer() {
 	consumerTopicNameLogs := config.Config.ConsumerTopicLogs
 
 	// Input Channels
-	consumerTopicChanLogs := kafka.KafkaTopicConsumers.TopicChannels[consumerTopicNameLogs]
+	consumerTopicChanLogs := kafka.KafkaTopicConsumer.TopicChannels[consumerTopicNameLogs]
 
 	// Output channels
 	addressLoaderChan := crud.GetAddressModel().LoaderChannel

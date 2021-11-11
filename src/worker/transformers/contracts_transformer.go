@@ -19,7 +19,7 @@ func contractsTransformer() {
 	consumerTopicNameContracts := config.Config.ConsumerTopicContractsProcessed
 
 	// Input channels
-	consumerTopicChanContracts := kafka.KafkaTopicConsumers.TopicChannels[consumerTopicNameContracts]
+	consumerTopicChanContracts := kafka.KafkaTopicConsumer.TopicChannels[consumerTopicNameContracts]
 
 	// Output channels
 	contractLoaderChan := crud.GetContractModel().LoaderChannel

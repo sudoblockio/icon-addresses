@@ -20,7 +20,7 @@ func blocksTransformer() {
 	consumerTopicNameBlocks := config.Config.ConsumerTopicBlocks
 
 	// Input channels
-	consumerTopicChanBlocks := kafka.KafkaTopicConsumers.TopicChannels[consumerTopicNameBlocks]
+	consumerTopicChanBlocks := kafka.KafkaTopicConsumer.TopicChannels[consumerTopicNameBlocks]
 
 	// Output channels
 	blockLoaderChan := crud.GetBlockModel().LoaderChannel
