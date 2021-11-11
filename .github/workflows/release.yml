@@ -171,7 +171,7 @@ jobs:
           repository: geometry-labs/icon-charts
           valueFile: 'deployments/prod-us-west-2/mainnet/addresses/values.yaml'
           propertyPath: 'api.image.tag'
-          value: ${{ steps.source.outputs.TAG }}
+          value: prod-${{ steps.source.outputs.TAG }}
           branch: main
           createPR: 'false'
           updateFile: true
@@ -184,7 +184,7 @@ jobs:
           repository: geometry-labs/icon-charts
           valueFile: 'deployments/prod-us-west-2/mainnet/addresses/values.yaml'
           propertyPath: 'worker.image.tag'
-          value: ${{ steps.source.outputs.TAG }}
+          value: prod-${{ steps.source.outputs.TAG }}
           branch: main
           createPR: 'false'
           message: 'addresses prod deployment (mainnet) image versions to $${{ steps.source.outputs.TAG }}'
