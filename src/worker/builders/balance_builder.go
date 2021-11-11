@@ -55,9 +55,11 @@ func startBalanceBuilder(startBlockNumber uint64) {
 			TransactionIndex: 0,
 			LogIndex:         -1,
 			PublicKey:        "hx54f7853dc6481b670caf69c5a27c7c8fe5be8269",
-			Value:            "0x2961FFF8CA4A62327800000",
-			ValueDecimal:     800460000,
-			Timestamp:        0,
+			// Value:            "0x2961FFF8CA4A62327800000",
+			// ValueDecimal:     800460000,
+			Value:        "0x0",
+			ValueDecimal: 0,
+			Timestamp:    0,
 		}
 
 		currentBlockNumber++
