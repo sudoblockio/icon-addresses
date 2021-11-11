@@ -19,7 +19,7 @@ func governancePrepsTransformer() {
 	consumerTopicNameGovernancePreps := config.Config.ConsumerTopicGovernancePrepsProcessed
 
 	// Input channels
-	consumerTopicChanGovernancePreps := kafka.KafkaTopicConsumers[consumerTopicNameGovernancePreps].TopicChannel
+	consumerTopicChanGovernancePreps := kafka.KafkaTopicConsumers.TopicChannels[consumerTopicNameGovernancePreps]
 
 	// Output channels
 	governancePrepLoaderChan := crud.GetGovernancePrepProcessedModel().LoaderChannel
