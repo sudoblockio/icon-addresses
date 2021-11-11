@@ -10,9 +10,9 @@ import (
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 
-	"github.com/geometry-labs/icon-blocks/config"
-	"github.com/geometry-labs/icon-blocks/crud"
-	"github.com/geometry-labs/icon-blocks/models"
+	"github.com/geometry-labs/icon-addresses/config"
+	"github.com/geometry-labs/icon-addresses/crud"
+	"github.com/geometry-labs/icon-addresses/models"
 )
 
 type kafkaTopicConsumer struct {
