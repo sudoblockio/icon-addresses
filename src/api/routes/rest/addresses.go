@@ -61,6 +61,10 @@ func handlerGetAddresses(c *fiber.Ctx) error {
 		c.Status(422)
 		return c.SendString(`{"error": "limit must be greater than 0 and less than 101"}`)
 	}
+	if params.Skip < 0 || params.Skip > config.Config.MaxPageSkip {
+		c.Status(422)
+		return c.SendString(`{"error": "invalid skip"}`)
+	}
 
 	// Get Addresses
 	addresses, err := crud.GetAddressModel().SelectManyAPI(
@@ -164,6 +168,10 @@ func handlerGetContracts(c *fiber.Ctx) error {
 	if params.Limit < 1 || params.Limit > config.Config.MaxPageSize {
 		c.Status(422)
 		return c.SendString(`{"error": "limit must be greater than 0 and less than 101"}`)
+	}
+	if params.Skip < 0 || params.Skip > config.Config.MaxPageSkip {
+		c.Status(422)
+		return c.SendString(`{"error": "invalid skip"}`)
 	}
 
 	// Get contracts
