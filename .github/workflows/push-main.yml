@@ -75,7 +75,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr-worker.outputs.registry }}
           ECR_REPOSITORY: icon-addresses-worker
-          IMAGE_TAG: ${{ github.run_number }}
+          IMAGE_TAG: dev-${{ github.run_number }}
         run: |
           docker build --target prod --build-arg SERVICE_NAME=worker -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
@@ -95,7 +95,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr-api.outputs.registry }}
           ECR_REPOSITORY: icon-addresses-api
-          IMAGE_TAG: ${{ github.run_number }}
+          IMAGE_TAG: dev-${{ github.run_number }}
         run: |
           docker build --target prod  --build-arg SERVICE_NAME=api -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
@@ -115,7 +115,7 @@ jobs:
           repository: geometry-labs/icon-charts
           valueFile: 'deployments/dev/mainnet/addresses/values.yaml'
           propertyPath: 'api.image.tag'
-          value: ${{ github.run_number }}
+          value: dev-${{ github.run_number }}
           branch: main
           createPR: 'false'
           updateFile: true
@@ -128,7 +128,7 @@ jobs:
           repository: geometry-labs/icon-charts
           valueFile: 'deployments/dev/mainnet/addresses/values.yaml'
           propertyPath: 'worker.image.tag'
-          value: ${{ github.run_number }}
+          value: dev-${{ github.run_number }}
           branch: main
           createPR: 'false'
           message: 'addresses dev deployment (mainnet) image versions to ${{ github.run_number }}'
