@@ -2,7 +2,6 @@ package routines
 
 import (
 	"errors"
-	"math/big"
 	"time"
 
 	"github.com/jinzhu/copier"
@@ -49,6 +48,10 @@ func balanceRoutine(duration time.Duration) {
 			zap.S().Info("Routine=Balance", " - Processing ", len(*addresses), " addresses...")
 			for _, a := range *addresses {
 
+				/////////////
+				// Balance //
+				/////////////
+
 				// Node call
 				balance, err := utils.IconNodeServiceGetBalanceOf(a.PublicKey)
 				if err != nil {
@@ -58,18 +61,20 @@ func balanceRoutine(duration time.Duration) {
 				}
 
 				// Hex -> float64
-				balanceBigInt, _ := new(big.Int).SetString(balance[2:], 16)
-				balanceDecimal := float64(0)
+				a.Balance = utils.StringHexBase18ToFloat64(balance)
 
-				baseBigFloat, _ := new(big.Float).SetString("1000000000000000000") // 10^18
-				balanceBigFloat := new(big.Float).SetInt(balanceBigInt)
+				////////////////////
+				// Staked Balance //
+				////////////////////
+				stakedBalance, err := utils.IconNodeServiceGetStakedBalanceOf(a.PublicKey)
+				if err != nil {
+					// Icon node error
+					zap.S().Warn("Routine=Balance, publicKey=", a.PublicKey, " - Error: ", err.Error())
+					continue
+				}
 
-				// newValue / 10^18
-				balanceBigFloat = balanceBigFloat.Quo(balanceBigFloat, baseBigFloat)
-
-				balanceDecimal, _ = balanceBigFloat.Float64()
-
-				a.Balance = balanceDecimal
+				// Hex -> float64
+				a.Balance += utils.StringHexBase18ToFloat64(stakedBalance)
 
 				// Copy struct for pointer conflicts
 				addressCopy := &models.Address{}

@@ -19,3 +19,12 @@ func TestIconNodeServiceGetBalanceOf(t *testing.T) {
 
 	t.Log(balance)
 }
+
+func TestIconNodeServiceGetStakedBalanceOf(t *testing.T) {
+	assert := assert.New(t)
+
+	balance, err := IconNodeServiceGetStakedBalanceOf("hx9d9ad1bc19319bd5cdb5516773c0e376db83b644")
+	assert.Equal(nil, err)
+
+	t.Log(balance)
+}
