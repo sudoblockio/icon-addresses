@@ -188,10 +188,9 @@ func handlerGetContracts(c *fiber.Ctx) error {
 		c.Status(204)
 	}
 
-	// TODO
 	// Set X-TOTAL-COUNT
 	// Total count in the address_counts table
-	counter, err := crud.GetAddressCountModel().SelectCount("Contract")
+	counter, err := crud.GetAddressCountModel().SelectCount("contract")
 	if err != nil {
 		counter = 0
 		zap.S().Warn("Could not retrieve address count: ", err.Error())

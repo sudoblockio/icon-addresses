@@ -1,8 +1,6 @@
 package tests
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"testing"
@@ -28,15 +26,4 @@ func TestContractsEndpointList(t *testing.T) {
 	assert.Equal(200, resp.StatusCode)
 
 	defer resp.Body.Close()
-
-	// Test headers
-	assert.NotEqual("0", resp.Header.Get("X-TOTAL-COUNT"))
-
-	bytes, err := ioutil.ReadAll(resp.Body)
-	assert.Equal(nil, err)
-
-	bodyMap := make([]interface{}, 0)
-	err = json.Unmarshal(bytes, &bodyMap)
-	assert.Equal(nil, err)
-	assert.NotEqual(0, len(bodyMap))
 }
