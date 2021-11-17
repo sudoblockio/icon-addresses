@@ -4,15 +4,11 @@ name: release
 # 2. Push containers to AWS ECR and dockerhub tagged with release
 # 3. Recommit an update to the chart's deployments with the updated build number in the `deployment` branch
 
-#on:
-#  release:
-#    types: [created]
-#    tags:
-#      - "v*.*.*"
 on:
-  push:
-    branches:
-      - main
+  release:
+    types: [created]
+    tags:
+      - "v*.*.*"
 
 jobs:
   docker:
