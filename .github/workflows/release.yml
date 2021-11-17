@@ -4,21 +4,19 @@ name: release
 # 2. Push containers to AWS ECR and dockerhub tagged with release
 # 3. Recommit an update to the chart's deployments with the updated build number in the `deployment` branch
 
-on:
-  push:
-    branches:
-      - main
-
 #on:
 #  release:
 #    types: [created]
 #    tags:
 #      - "v*.*.*"
+on:
+  push:
+    branches:
+      - main
 
 jobs:
-  build-and-push:
+  docker:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -162,17 +160,6 @@ jobs:
           push: true
           tags: geometrylabs/icon-addresses-api:${{ steps.source.outputs.TAG }}
 
-  update-values:
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        deplyment:
-          - 'prod-us-west-2/sejong'
-          - 'prod-us-west-2/mainnet'
-          - 'prod-eu-west-1/mainnet'
-
-    steps:
       - name: Checkout charts repo
         uses: actions/checkout@v2
         with:
@@ -181,17 +168,12 @@ jobs:
           path: charts
           token: ${{ secrets.ICON_CHARTS_PAT }}
 
-      - name: Tag name
-        id: source
-        run: |
-          echo ::set-output name=TAG::${GITHUB_REF#refs/tags/}
-
-      - name: Update prod deployment values file (API) and re-commit
+      - name: Update prod-sejong-us-west-2 deployment values file (API)
         uses: fjogeleit/yaml-update-action@master
         with:
           workDir: charts
           repository: geometry-labs/icon-charts
-          valueFile: 'deployments/${{ matrix.deployment }}/addresses/values.yaml'
+          valueFile: 'deployments/prod-us-west-2/sejong/addresses/values.yaml'
           propertyPath: 'api.image.tag'
           value: prod-${{ steps.source.outputs.TAG }}
           branch: main
@@ -199,12 +181,12 @@ jobs:
           updateFile: true
           commitChange: false
 
-      - name: Update prod deployment values file (WORKER) and re-commit
+      - name: Update prod-sejong-us-west-2 deployment values file (WORKER)
         uses: fjogeleit/yaml-update-action@master
         with:
           workDir: charts
           repository: geometry-labs/icon-charts
-          valueFile: 'deployments/${{ matrix.deployment }}/addresses/values.yaml'
+          valueFile: 'deployments/prod-us-west-2/sejong/addresses/values.yaml'
           propertyPath: 'worker.image.tag'
           value: prod-${{ steps.source.outputs.TAG }}
           branch: main
@@ -212,15 +194,63 @@ jobs:
           updateFile: true
           commitChange: false
 
-  push-tags:
-    runs-on: ubuntu-latest
-    steps:
+      - name: Update prod-mainnet-us-west-2 deployment values file (API)
+        uses: fjogeleit/yaml-update-action@master
+        with:
+          workDir: charts
+          repository: geometry-labs/icon-charts
+          valueFile: 'deployments/prod-eu-west-1/mainnet/addresses/values.yaml'
+          propertyPath: 'api.image.tag'
+          value: prod-${{ steps.source.outputs.TAG }}
+          branch: main
+          createPR: 'false'
+          updateFile: true
+          commitChange: false
+
+      - name: Update prod-mainnet deployment values file (WORKER)
+        uses: fjogeleit/yaml-update-action@master
+        with:
+          workDir: charts
+          repository: geometry-labs/icon-charts
+          valueFile: 'deployments/prod-eu-west-1/mainnet/addresses/values.yaml'
+          propertyPath: 'worker.image.tag'
+          value: prod-${{ steps.source.outputs.TAG }}
+          branch: main
+          createPR: 'false'
+          updateFile: true
+          commitChange: false
+
+      - name: Update prod-mainnet-us-west-2 deployment values file (API)
+        uses: fjogeleit/yaml-update-action@master
+        with:
+          workDir: charts
+          repository: geometry-labs/icon-charts
+          valueFile: 'deployments/prod-us-west-2/mainnet/addresses/values.yaml'
+          propertyPath: 'api.image.tag'
+          value: prod-${{ steps.source.outputs.TAG }}
+          branch: main
+          createPR: 'false'
+          updateFile: true
+          commitChange: false
+
+      - name: Update prod-mainnet-us-west-2 deployment values file (WORKER) and re-commit
+        uses: fjogeleit/yaml-update-action@master
+        with:
+          workDir: charts
+          repository: geometry-labs/icon-charts
+          valueFile: 'deployments/prod-us-west-2/mainnet/addresses/values.yaml'
+          propertyPath: 'worker.image.tag'
+          value: prod-${{ steps.source.outputs.TAG }}
+          branch: main
+          createPR: 'false'
+          updateFile: true
+          commitChange: false
+
       - name: Push tags
         run: |
           git stash
           git pull
           git tag -f addresses-prod-uswest2
-          git tag -f addresses-prod-euwest1
-          git tag -f addresses-sejong-uswest2
+          git tag -f addresses-prod-euwest2
           git push -f origin --tags
         working-directory: charts
