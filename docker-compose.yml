@@ -89,10 +89,6 @@ services:
       target: ${ADDRESSES_TARGET:-prod}
       args:
         - SERVICE_NAME=worker
-    ports:
-      - "8181:8181"     # Health
-      - "9401:9401"     # Prometheus
-      - "40001:40001"   # Remote Debug
     security_opt:
       - "seccomp:unconfined"
     cap_add:
@@ -101,7 +97,19 @@ services:
       - ${ADDRESSES_CONTEXT:-.}/src:/app
     environment:
       <<: *env
-      # Ports
-      PORT: "8001"
-      HEALTH_PORT: "8181"
-      METRICS_PORT: "9401"
+
+  addresses-balance-worker:
+    build:
+      context: ${ADDRESSES_CONTEXT:-.}
+      target: ${ADDRESSES_TARGET:-prod}
+      args:
+        - SERVICE_NAME=worker
+    security_opt:
+      - "seccomp:unconfined"
+    cap_add:
+      - SYS_PTRACE
+    volumes:
+      - ${ADDRESSES_CONTEXT:-.}/src:/app
+    environment:
+      <<: *env
+      ONLY_RUN_BALANCE_ROUTINE: "true"

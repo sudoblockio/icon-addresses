@@ -141,7 +141,7 @@ func (m *BalanceModel) UpsertOne(
 	db := m.db
 
 	// map[string]interface{}
-	updateOnConflictValues := extractFilledFieldsFromModel(
+	updateOnConflictValues := extractAllFieldsFromModel(
 		reflect.ValueOf(*balance),
 		reflect.TypeOf(*balance),
 	)

@@ -2,6 +2,24 @@ package crud
 
 import "reflect"
 
+func extractAllFieldsFromModel(modelValueOf reflect.Value, modelTypeOf reflect.Type) map[string]interface{} {
+
+	fields := map[string]interface{}{}
+
+	for i := 0; i < modelValueOf.NumField(); i++ {
+		modelField := modelValueOf.Field(i)
+		modelType := modelTypeOf.Field(i)
+
+		modelTypeJSONTag := modelType.Tag.Get("json")
+		if modelTypeJSONTag != "" {
+
+			fields[modelTypeJSONTag] = modelField.Interface()
+		}
+	}
+
+	return fields
+}
+
 func extractFilledFieldsFromModel(modelValueOf reflect.Value, modelTypeOf reflect.Type) map[string]interface{} {
 
 	fields := map[string]interface{}{}
