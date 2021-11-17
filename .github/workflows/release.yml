@@ -10,16 +10,17 @@ on:
     tags:
       - "v*.*.*"
 
-strategy:
-  matrix:
-    deplyment:
-      - 'prod-us-west-2/sejong'
-      - 'prod-us-west-2/mainnet'
-      - 'prod-eu-west-1/mainnet'
-
 jobs:
   docker:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        deplyment:
+          - 'prod-us-west-2/sejong'
+          - 'prod-us-west-2/mainnet'
+          - 'prod-eu-west-1/mainnet'
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
