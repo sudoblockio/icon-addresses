@@ -242,10 +242,21 @@ jobs:
           updateFile: true
           commitChange: false
 
+      - name: Configure credentials
+        uses: oleksiyrudenko/gha-git-credentials@v2-latest
+        with:
+          token: '${{ secrets.ICON_CHARTS_PAT }}'
+          global: true
+
+      - name: Commit all updates
+        run: |
+          git add -A
+          git commit -m "addresses prod deployment (mainnet) image versions to ${{ steps.source.outputs.TAG }}"
+          git push origin
+        working-directory: charts
+
       - name: Push tags
         run: |
-          git stash
-          git pull
           git tag -f addresses-prod-uswest2
           git tag -f addresses-prod-euwest2
           git push -f origin --tags
