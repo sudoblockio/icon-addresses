@@ -57,6 +57,10 @@ type configType struct {
 	ConsumerTopicLogs                     string `envconfig:"CONSUMER_TOPIC_LOGS" required:"false" default:"logs"`
 	ConsumerTopicContractsProcessed       string `envconfig:"CONSUMER_TOPIC_CONTRACTS_PROCESSED" required:"false" default:"contracts-processed"`
 	ConsumerTopicGovernancePrepsProcessed string `envconfig:"CONSUMER_TOPIC_GOVERNANCE_PREPS_PROCESSED" required:"false" default:"governance-preps-processed"`
+	ConsumerIsPartitionConsumer           bool   `envconfig:"CONSUMER_IS_PARTITION_CONSUMER" required:"false" default:"false"`
+	ConsumerPartition                     int    `envconfig:"CONSUMER_PARTITION" required:"false" default:"0"`
+	ConsumerPartitionTopic                string `envconfig:"CONSUMER_PARTITION_TOPIC" required:"false" default:"blocks"`
+	ConsumerPartitionStartOffset          int    `envconfig:"CONSUMER_PARTITION_START_OFFSET" required:"false" default:"1"`
 
 	// DB
 	DbDriver             string `envconfig:"DB_DRIVER" required:"false" default:"postgres"`
