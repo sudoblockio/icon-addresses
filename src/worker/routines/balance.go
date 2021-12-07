@@ -82,7 +82,7 @@ func balanceRoutine(duration time.Duration) {
 
 				// Insert to database
 				crud.GetAddressModel().LoaderChannel <- addressCopy
-				zap.S().Info("PUBLICKEY=", a.PublicKey, ",BALANCE=", a.Balance)
+				zap.S().Debug("PUBLICKEY=", a.PublicKey, ",BALANCE=", a.Balance)
 				metrics.BalanceRoutineNumAddressesComputed.Inc()
 			}
 
