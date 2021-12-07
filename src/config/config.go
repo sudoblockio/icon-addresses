@@ -90,7 +90,7 @@ type configType struct {
 	GormLoggingThresholdMilli int `envconfig:"GORM_LOGGING_THRESHOLD_MILLI" required:"false" default:"250"`
 
 	// Feature flags
-	OnlyRunBalanceRoutine bool `envconfig:"ONLY_RUN_BALANCE_ROUTINE" required:"false" default:"false"`
+	OnlyRunAllRoutines bool `envconfig:"ONLY_RUN_ALL_ROUTINES" required:"false" default:"false"`
 }
 
 var Config configType
