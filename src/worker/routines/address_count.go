@@ -54,7 +54,7 @@ func addressCountRoutine(duration time.Duration) {
 		//////////////
 
 		// Count
-		count, err := crud.GetAddressModel().CountContract()
+		count, err = crud.GetAddressModel().CountContract()
 		if err != nil {
 			// Postgres error
 			zap.S().Warn(err)
@@ -62,7 +62,7 @@ func addressCountRoutine(duration time.Duration) {
 		}
 
 		// Update Redis
-		countKey := "icon_addresses_address_count_contract"
+		countKey = "icon_addresses_address_count_contract"
 		err = redis.GetRedisClient().SetCount(countKey, count)
 		if err != nil {
 			// Redis error
@@ -82,7 +82,7 @@ func addressCountRoutine(duration time.Duration) {
 		///////////
 
 		// Count
-		count, err := crud.GetAddressModel().CountToken()
+		count, err = crud.GetAddressModel().CountToken()
 		if err != nil {
 			// Postgres error
 			zap.S().Warn(err)
@@ -90,7 +90,7 @@ func addressCountRoutine(duration time.Duration) {
 		}
 
 		// Update Redis
-		countKey := "icon_addresses_address_count_token"
+		countKey = "icon_addresses_address_count_token"
 		err = redis.GetRedisClient().SetCount(countKey, count)
 		if err != nil {
 			// Redis error
@@ -99,7 +99,7 @@ func addressCountRoutine(duration time.Duration) {
 		}
 
 		// Update Postgres
-		addressCount := &models.AddressCount{
+		addressCount = &models.AddressCount{
 			Type:  "token",
 			Count: uint64(count),
 		}
