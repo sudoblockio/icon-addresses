@@ -22,9 +22,10 @@ func main() {
 	// Start Prometheus client
 	metrics.Start()
 
-	if config.Config.OnlyRunBalanceRoutine == true {
+	if config.Config.OnlyRunAllRoutines == true {
 		// Start Routines
 		routines.StartBalanceRoutine()
+		routines.StartAddressCountRoutine()
 
 		global.WaitShutdownSig()
 	}

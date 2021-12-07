@@ -177,6 +177,54 @@ func (m *AddressModel) SelectManyContractsAPI(
 	return contracts, db.Error
 }
 
+// SelectCount - select from blockCounts table
+// NOTE very slow operation
+func (m *AddressModel) CountAll() (int64, error) {
+	db := m.db
+
+	// Set table
+	db = db.Model(&models.Address{})
+
+	count := int64(0)
+	db = db.Count(&count)
+
+	return count, db.Error
+}
+
+// SelectCount - select from blockCounts table
+// NOTE very slow operation
+func (m *AddressModel) CountContract() (int64, error) {
+	db := m.db
+
+	// Set table
+	db = db.Model(&models.Address{})
+
+	// Is Contract
+	db = db.Where("is_contract = ?", true)
+
+	count := int64(0)
+	db = db.Count(&count)
+
+	return count, db.Error
+}
+
+// SelectCount - select from blockCounts table
+// NOTE very slow operation
+func (m *AddressModel) CountToken() (int64, error) {
+	db := m.db
+
+	// Set table
+	db = db.Model(&models.Address{})
+
+	// Is Contract
+	db = db.Where("is_token = ?", true)
+
+	count := int64(0)
+	db = db.Count(&count)
+
+	return count, db.Error
+}
+
 func (m *AddressModel) UpsertOne(
 	address *models.Address,
 ) error {
