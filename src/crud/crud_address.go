@@ -158,7 +158,7 @@ func (m *AddressModel) SelectManyContractsAPI(
 	db = db.Model(&models.Address{})
 
 	// Order balances
-	db = db.Order("balance DESC")
+	db = db.Order("transaction_count DESC")
 
 	// Is contract
 	db = db.Where("is_contract = ?", true)
