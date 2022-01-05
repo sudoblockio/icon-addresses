@@ -26,6 +26,7 @@ func main() {
 		// Start Routines
 		routines.StartBalanceRoutine()
 		routines.StartAddressCountRoutine()
+		routines.StartAddressTypeRoutine()
 
 		global.WaitShutdownSig()
 	}

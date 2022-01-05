@@ -168,7 +168,7 @@ func DefaultListTransactionCountByPublicKeyIndex(ctx context.Context, db *gorm1.
 		}
 	}
 	db = db.Where(&ormObj)
-	db = db.Order("public_key")
+	db = db.Order("transaction_hash")
 	ormResponse := []TransactionCountByPublicKeyIndexORM{}
 	if err := db.Find(&ormResponse).Error; err != nil {
 		return nil, err

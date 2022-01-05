@@ -112,4 +112,4 @@ services:
       - ${ADDRESSES_CONTEXT:-.}/src:/app
     environment:
       <<: *env
-      ONLY_RUN_BALANCE_ROUTINE: "true"
+      ONLY_RUN_ALL_ROUTINES: "true"

@@ -12,13 +12,15 @@ message Address {
   uint64 transaction_count = 3 [(gorm.field).tag = {index: "address_idx_transaction_count"}];
   uint64 log_count = 4 [(gorm.field).tag = {index: "address_idx_log_count"}];
   double balance = 5 [(gorm.field).tag = {index: "address_idx_balance"}];
+  string type = 6;
 
   // Only relevant in contract addresses
-  string name = 6;
-  string status = 7;
-  uint64 created_timestamp = 8 [(gorm.field).tag = {index: "address_idx_created_timestamp"}];
-  bool is_token = 9 [(gorm.field).tag = {index: "address_idx_is_token"}];
+  string name = 7;
+  string status = 8;
+  uint64 created_timestamp = 9 [(gorm.field).tag = {index: "address_idx_created_timestamp"}];
+  bool is_token = 10 [(gorm.field).tag = {index: "address_idx_is_token"}];
 
   // Goveranance 
-  bool is_prep = 10 [(gorm.field).tag = {index: "address_idx_is_governance_prep"}];
+  bool is_prep = 11 [(gorm.field).tag = {index: "address_idx_is_governance_prep"}];
+
 }
