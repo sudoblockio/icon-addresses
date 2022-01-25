@@ -27,6 +27,7 @@ func main() {
 		routines.StartBalanceRoutine()
 		routines.StartAddressCountRoutine()
 		routines.StartAddressTypeRoutine()
+		routines.StartTransactionCountByPublicKeyRoutine()
 
 		global.WaitShutdownSig()
 	}

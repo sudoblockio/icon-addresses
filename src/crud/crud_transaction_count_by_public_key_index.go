@@ -50,6 +50,24 @@ func (m *TransactionCountByPublicKeyIndexModel) Migrate() error {
 	return err
 }
 
+// CountByPublicKey - Count transactionCountByIndex by address
+// NOTE this function may take very long for some addresses
+func (m *TransactionCountByPublicKeyIndexModel) CountByPublicKey(publicKey string) (int64, error) {
+	db := m.db
+
+	// Set table
+	db = db.Model(&models.TransactionCountByPublicKeyIndex{})
+
+	// PublicKey
+	db = db.Where("public_key = ?", publicKey)
+
+	// Count
+	var count int64
+	db = db.Count(&count)
+
+	return count, db.Error
+}
+
 // Insert - Insert transactionCountByIndex into table
 func (m *TransactionCountByPublicKeyIndexModel) Insert(transactionCountByPublicKeyIndex *models.TransactionCountByPublicKeyIndex) error {
 	db := m.db

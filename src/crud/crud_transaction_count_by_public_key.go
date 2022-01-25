@@ -72,6 +72,31 @@ func (m *TransactionCountByPublicKeyModel) SelectOne(publicKey string) (*models.
 	return transactionCountByPublicKey, db.Error
 }
 
+// SelectMany - select from transactions table
+// Returns: models, error (if present)
+func (m *TransactionCountByPublicKeyModel) SelectMany(
+	limit int,
+	skip int,
+) (*[]models.TransactionCountByPublicKey, error) {
+	db := m.db
+
+	// Set table
+	db = db.Model(&[]models.TransactionCountByPublicKey{})
+
+	// Limit
+	db = db.Limit(limit)
+
+	// Skip
+	if skip != 0 {
+		db = db.Offset(skip)
+	}
+
+	transactionCountByPublicKeys := &[]models.TransactionCountByPublicKey{}
+	db = db.Find(transactionCountByPublicKeys)
+
+	return transactionCountByPublicKeys, db.Error
+}
+
 // Select - select from transactionCountByPublicKeys table
 func (m *TransactionCountByPublicKeyModel) SelectCount(publicKey string) (uint64, error) {
 	db := m.db
