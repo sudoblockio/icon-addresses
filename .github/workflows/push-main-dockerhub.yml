@@ -50,8 +50,8 @@ jobs:
       - name: Check api logs
         run: docker-compose -f docker-compose.yml -f docker-compose.db.yml logs --tail=100 addresses-api
 
-      - name: Run integration tests
-        run: cd tests && go test -v -covermode=atomic -coverprofile=coverage.out ./...
+#      - name: Run integration tests
+#        run: cd tests && go test -v -covermode=atomic -coverprofile=coverage.out ./...
 
       - uses: codecov/codecov-action@v2
         with:
