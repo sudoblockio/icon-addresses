@@ -1,14 +1,13 @@
-name: release
+name: push-main-dockerhub
 
 # 1. Run unit and integration tests
-# 2. Push containers to AWS ECR and dockerhub tagged with release
+# 2. Push containers to dockerhub with tag based on incrementing build number
 # 3. Recommit an update to the chart's deployments with the updated build number in the `deployment` branch
 
 on:
-  release:
-    types: [created]
-    tags:
-      - "v*.*.*"
+  push:
+    branches:
+      - main
 
 jobs:
   docker:

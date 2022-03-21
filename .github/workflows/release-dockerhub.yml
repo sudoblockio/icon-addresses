@@ -1,4 +1,4 @@
-name: release
+name: release-dockerhub
 
 # 1. Run unit and integration tests
 # 2. Push containers to AWS ECR and dockerhub tagged with release
