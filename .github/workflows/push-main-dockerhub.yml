@@ -10,7 +10,7 @@ on:
       - main
 
 jobs:
-  docker:
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -60,6 +60,12 @@ jobs:
           flags: integration
           fail_ci_if_error: true
 
+  docker:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.source.outputs.TAG }}
+
+    steps:
       - id: last
         uses: pozetroninc/github-action-get-latest-release@master
         with:
@@ -100,6 +106,20 @@ jobs:
           repository: sudoblock/icon-blocks-api
           tags: latest, ${{ steps.source.outputs.TAG }}
 
+  push_refs:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - cluster: dev-lax
+            network_name: mainnet
+            network_version: v1
+          - cluster: dev-lax
+            network_name: sejong
+            network_version: v1
+
+    steps:
+
       - name: Checkout charts repo
         uses: actions/checkout@v2
         with:
@@ -113,9 +133,9 @@ jobs:
         with:
           workDir: charts
           repository: sudoblockio/icon-charts
-          valueFile: 'deployments/dev-lax/mainnet/addresses/values.yaml'
+          valueFile: 'deployments/${{ matrix.cluster }}/${{ matrix.network_name }}-${{ matrix.network_version }}/addresses/values.yaml'
           propertyPath: 'api.image.tag'
-          value: ${{ steps.source.outputs.TAG }}
+          value: ${{needs.docker.outputs.tag}}
           branch: main
           createPR: 'false'
           updateFile: true
@@ -126,9 +146,9 @@ jobs:
         with:
           workDir: charts
           repository: sudoblockio/icon-charts
-          valueFile: 'deployments/dev-lax/mainnet/addresses/values.yaml'
+          valueFile: 'deployments/${{ matrix.cluster }}/${{ matrix.network_name }}-${{ matrix.network_version }}/addresses/values.yaml'
           propertyPath: 'worker.image.tag'
-          value: ${{ steps.source.outputs.TAG }}
+          value: ${{needs.docker.outputs.tag}}
           branch: main
           createPR: 'false'
           updateFile: true
@@ -143,6 +163,6 @@ jobs:
       - name: Commit all updates
         run: |
           git add -A
-          git commit -m "addresses dev deployment image versions to ${{ steps.source.outputs.TAG }}"
+          git commit -m "addresses dev deployment image versions to ${{needs.docker.outputs.tag}}"
           git push origin
         working-directory: charts
