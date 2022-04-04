@@ -94,7 +94,7 @@ jobs:
           file: ./Dockerfile
           target: prod
           push: true
-          repository: sudoblock/icon-blocks-api
+          repository: sudoblock/icon-addresses-api
           tags: latest, ${{ steps.source.outputs.TAG }}
 
       - name: Build and push (WORKER)
@@ -106,7 +106,7 @@ jobs:
           file: ./Dockerfile
           target: prod
           push: true
-          repository: sudoblock/icon-blocks-api
+          repository: sudoblock/icon-addresses-worker
           tags: latest, ${{ steps.source.outputs.TAG }}
 
   push_refs:
