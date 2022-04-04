@@ -66,6 +66,9 @@ jobs:
       tag: ${{ steps.source.outputs.TAG }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
       - id: last
         uses: pozetroninc/github-action-get-latest-release@master
         with:
