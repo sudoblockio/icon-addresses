@@ -130,6 +130,11 @@ jobs:
           path: charts
           token: ${{ secrets.ICON_CHARTS_PAT }}
 
+      - name: Git pull the latest
+        run: |
+          git pull
+        working-directory: charts
+
       - name: Update dev-lax mainnet deployment values file (API)
         uses: fjogeleit/yaml-update-action@master
         with:
@@ -165,6 +170,6 @@ jobs:
       - name: Commit all updates
         run: |
           git add -A
-          git commit -m "addresses dev deployment image versions to ${{needs.docker.outputs.tag}}"
+          git commit -m "addresses ${{ matrix.cluster }}/${{ matrix.network_name }}-${{ matrix.network_version }} deployment image version to ${{needs.docker.outputs.tag}}"
           git push origin
         working-directory: charts
