@@ -94,8 +94,7 @@ jobs:
           file: ./Dockerfile
           target: prod
           push: true
-          repository: sudoblock/icon-addresses-api
-          tags: latest, ${{ steps.source.outputs.TAG }}
+          tags: sudoblock/icon-addresses-api:latest, sudoblock/icon-addresses-api:${{ steps.source.outputs.TAG }}
 
       - name: Build and push (WORKER)
         uses: docker/build-push-action@v2
@@ -106,8 +105,7 @@ jobs:
           file: ./Dockerfile
           target: prod
           push: true
-          repository: sudoblock/icon-addresses-worker
-          tags: latest, ${{ steps.source.outputs.TAG }}
+          tags: sudoblock/icon-addresses-worker:latest, sudoblock/icon-addresses-worker:${{ steps.source.outputs.TAG }}
 
   push_refs:
     runs-on: ubuntu-latest
